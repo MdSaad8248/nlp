@@ -1,0 +1,28 @@
+{
+  "label2id": {
+    "ASSIGNMENT": 0,
+    "QUIZ": 1,
+    "EXAM": 2,
+    "PROJECT": 3,
+    "PROJECT_REVIEW": 4,
+    "CLASS_CHANGE": 5,
+    "CLASS_CANCELLATION": 6,
+    "ATTENDANCE": 7,
+    "ACADEMIC_EVENT": 8,
+    "CIRCULAR": 9,
+    "GENERAL_ANNOUNCEMENT": 10
+  },
+  "id2label": {
+    "0": "ASSIGNMENT",
+    "1": "QUIZ",
+    "2": "EXAM",
+    "3": "PROJECT",
+    "4": "PROJECT_REVIEW",
+    "5": "CLASS_CHANGE",
+    "6": "CLASS_CANCELLATION",
+    "7": "ATTENDANCE",
+    "8": "ACADEMIC_EVENT",
+    "9": "CIRCULAR",
+    "10": "GENERAL_ANNOUNCEMENT"
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "total_records": 350,
+  "records_per_category": {
+    "QUIZ": 39,
+    "ASSIGNMENT": 37,
+    "ATTENDANCE": 37,
+    "GENERAL_ANNOUNCEMENT": 34,
+    "PROJECT": 33,
+    "CIRCULAR": 33,
+    "CLASS_CANCELLATION": 33,
+    "CLASS_CHANGE": 32,
+    "EXAM": 26,
+    "PROJECT_REVIEW": 24,
+    "ACADEMIC_EVENT": 22
+  },
+  "course_distribution": {
+    "CSE2004": 87,
+    "CSE2006": 72,
+    "CSE4001": 67,
+    "CSE3002": 64,
+    "CSE3003": 60
+  },
+  "course_name_distribution": {
+    "Operating Systems": 87,
+    "Microprocessor and Microcontroller Techniques": 72,
+    "Natural Language Processing": 67,
+    "Machine Learning": 64,
+    "Database Systems": 60
+  },
+  "relationship_distribution": {
+    "NEW": 270,
+    "UPDATED": 31,
+    "DUPLICATE": 19,
+    "RESCHEDULED": 17,
+    "CANCELLED": 13
+  },
+  "records_containing_deadlines": 70,
+  "records_containing_dates_or_times": 350,
+  "records_containing_both_date_and_deadline": 70,
+  "entity_distribution": {
+    "COURSE": 350,
+    "TASK": 89,
+    "DEADLINE": 70,
+    "PLATFORM": 87,
+    "MARKS": 50,
+    "DATE": 280,
+    "TIME": 168,
+    "VENUE": 121,
+    "COURSE_CODE": 11
+  },
+  "categories_list": [
+    "ASSIGNMENT",
+    "QUIZ",
+    "EXAM",
+    "PROJECT",
+    "PROJECT_REVIEW",
+    "CLASS_CHANGE",
+    "CLASS_CANCELLATION",
+    "ATTENDANCE",
+    "ACADEMIC_EVENT",
+    "CIRCULAR",
+    "GENERAL_ANNOUNCEMENT"
+  ]
+}

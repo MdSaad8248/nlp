@@ -1,0 +1,53 @@
+{
+  "activation": "gelu",
+  "architectures": [
+    "DistilBertForSequenceClassification"
+  ],
+  "attention_dropout": 0.1,
+  "bos_token_id": null,
+  "dim": 768,
+  "dropout": 0.1,
+  "dtype": "float32",
+  "eos_token_id": null,
+  "hidden_dim": 3072,
+  "id2label": {
+    "0": "ASSIGNMENT",
+    "1": "QUIZ",
+    "2": "EXAM",
+    "3": "PROJECT",
+    "4": "PROJECT_REVIEW",
+    "5": "CLASS_CHANGE",
+    "6": "CLASS_CANCELLATION",
+    "7": "ATTENDANCE",
+    "8": "ACADEMIC_EVENT",
+    "9": "CIRCULAR",
+    "10": "GENERAL_ANNOUNCEMENT"
+  },
+  "initializer_range": 0.02,
+  "label2id": {
+    "ACADEMIC_EVENT": 8,
+    "ASSIGNMENT": 0,
+    "ATTENDANCE": 7,
+    "CIRCULAR": 9,
+    "CLASS_CANCELLATION": 6,
+    "CLASS_CHANGE": 5,
+    "EXAM": 2,
+    "GENERAL_ANNOUNCEMENT": 10,
+    "PROJECT": 3,
+    "PROJECT_REVIEW": 4,
+    "QUIZ": 1
+  },
+  "max_position_embeddings": 512,
+  "model_type": "distilbert",
+  "n_heads": 12,
+  "n_layers": 6,
+  "pad_token_id": 0,
+  "problem_type": "single_label_classification",
+  "qa_dropout": 0.1,
+  "seq_classif_dropout": 0.2,
+  "sinusoidal_pos_embds": false,
+  "tie_weights_": true,
+  "tie_word_embeddings": true,
+  "transformers_version": "5.17.0",
+  "vocab_size": 30522
+}

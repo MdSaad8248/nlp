@@ -1,0 +1,405 @@
+// AcademicAI Database Schema (Milestone 1 Foundation)
+// Configured with SQLite for clean zero-config local development,
+// seamlessly switchable to PostgreSQL via DATABASE_URL in production.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String              @id @default(uuid())
+  email            String              @unique
+  name             String
+  rollNumber       String?             @unique
+  role             String              @default("STUDENT") // "STUDENT" | "TEACHER" | "ADMIN"
+  passwordHash     String?
+  department       String?             // e.g. "School of Computer Science and Engineering"
+  program          String?             // e.g. "B.Tech Computer Science & Engineering"
+  semester         Int                 @default(8)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  
+  // Relations
+  courses          CourseEnrollment[]
+  managedCourses   CourseFaculty[]
+  tasks            Task[]
+  events           Event[]
+  notifications    Notification[]
+  preferences      StudentPreference?
+  chatSessions     ChatSession[]
+  plannerStates    PlannerState[]
+  syllabi          Syllabus[]
+  rubrics          Rubric[]
+
+  @@map("users")
+}
+
+model StudentPreference {
+  id                    String   @id @default(uuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  academicTimezone      String   @default("Asia/Kolkata")
+  notificationLeadDays  Int      @default(2)
+  highWorkloadThreshold Int      @default(4) // tasks/exams per 48h
+  preferredStudyHours   String?  // e.g. JSON string "18:00-23:00"
+  notificationsEnabled  Boolean  @default(true)
+  quietHoursStart       String?  // e.g. "23:00"
+  quietHoursEnd         String?  // e.g. "07:00"
+  digestEnabled         Boolean  @default(true)
+  urgentAlertsEnabled   Boolean  @default(true)
+  workloadAlertsEnabled Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("student_preferences")
+}
+
+model Course {
+  id             String             @id @default(uuid())
+  code           String             @unique // e.g. "CSE4001", "CSE3002"
+  title          String             // e.g. "Natural Language Processing"
+  faculty        String?            // e.g. "Dr. Academic Faculty"
+  credits        Int                @default(4)
+  slot           String?            // e.g. "A1+TA1", "B2"
+  venue          String?            // e.g. "SJT 402"
+  color          String             @default("#6366f1") // UI badge accent
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  // Relations
+  enrollments    CourseEnrollment[]
+  facultyMembers CourseFaculty[]
+  tasks          Task[]
+  events         Event[]
+  exams          Exam[]
+  timetable      TimetableEntry[]
+  syllabi        Syllabus[]
+  rubrics        Rubric[]
+
+  @@map("courses")
+}
+
+model CourseFaculty {
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  role      String   @default("PRIMARY_INSTRUCTOR") // PRIMARY_INSTRUCTOR, CO_INSTRUCTOR, TA
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+  @@map("course_faculty")
+}
+
+model CourseEnrollment {
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+  @@map("course_enrollments")
+}
+
+model AcademicSource {
+  id              String           @id @default(uuid())
+  title           String?          // inferred or provided title
+  rawText         String           // original natural language announcement
+  channel         String           @default("ANNOUNCEMENT") // EMAIL, CIRCULAR, WHATSAPP, MOODLE, MANUAL_PASTE
+  sourceFileUrl   String?          // if uploaded as pdf or screenshot
+  sourceMetadata  String?          // JSON metadata (e.g. sender, timestamp string)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  // Relations
+  evidences       SourceEvidence[]
+  auditLogs       AcademicAuditLog[]
+
+  @@map("academic_sources")
+}
+
+model Task {
+  id              String           @id @default(uuid())
+  userId          String
+  courseId        String?
+  title           String
+  description     String?
+  category        String           @default("ASSIGNMENT") // ASSIGNMENT, PROJECT, REVIEW, REPORT, QUIZ
+  deadline        DateTime?
+  normalizedDeadline String?       // parsed representation e.g. "2026-09-15 23:59:00"
+  priority        String           @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  status          String           @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, OVERDUE, CANCELLED
+  submissionPlatform String?       // e.g. "VTOP", "Moodle", "Canvas", "GitHub"
+  isRescheduled   Boolean          @default(false)
+  weightage       Float?           // marks or grade %
+  estimatedHours  Float?           // estimated effort in hours
+  isAiGenerated   Boolean          @default(false)
+  confidence      Float?           // NLP extraction confidence
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  // Relations
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course          Course?          @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  progress        TaskProgress[]
+  evidences       SourceEvidence[]
+  notifications   Notification[]
+  rubrics         Rubric[]
+
+  @@map("tasks")
+}
+
+model TaskProgress {
+  id          String   @id @default(uuid())
+  taskId      String
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  percentage  Int      @default(0)
+  note        String?
+  updatedAt   DateTime @default(now())
+
+  @@map("task_progress")
+}
+
+model Event {
+  id            String           @id @default(uuid())
+  userId        String
+  courseId      String?
+  title         String
+  description   String?
+  eventType     String           @default("LECTURE") // LECTURE, LAB, REVIEW, WORKSHOP, EXAM, SEMINAR, HOLIDAY
+  venue         String?
+  startTime     DateTime
+  endTime       DateTime
+  isRescheduled Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  // Relations
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course        Course?          @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  evidences     SourceEvidence[]
+
+  @@map("events")
+}
+
+model Exam {
+  id          String   @id @default(uuid())
+  courseId    String
+  title       String   // e.g. "CAT-1", "FAT", "Mid-term"
+  examDate    DateTime
+  startTime   String?  // e.g. "10:00 AM"
+  endTime     String?  // e.g. "11:30 AM"
+  venue       String?  // e.g. "SJT 101"
+  weightage   Float?   // e.g. 50
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  evidences   SourceEvidence[]
+
+  @@map("exams")
+}
+
+model TimetableEntry {
+  id        String   @id @default(uuid())
+  courseId  String
+  dayOfWeek Int      // 1=Monday, 2=Tuesday, ..., 7=Sunday
+  startTime String   // "09:00"
+  endTime   String   // "09:50"
+  slot      String?  // "A1"
+  venue     String?  // "SJT 402"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map("timetable_entries")
+}
+
+model SourceEvidence {
+  id          String          @id @default(uuid())
+  sourceId    String
+  source      AcademicSource  @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  taskId      String?
+  task        Task?           @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  eventId     String?
+  event       Event?          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  examId      String?
+  exam        Exam?           @relation(fields: [examId], references: [id], onDelete: Cascade)
+  fieldName   String?         // field supported e.g. "deadline", "event", "venue", "marks"
+  extractedSnippet String     // Exact verbatim natural language quote that justified this item
+  confidence  Float           @default(1.0)
+  createdAt   DateTime        @default(now())
+
+  @@map("source_evidence")
+}
+
+model Notification {
+  id           String    @id @default(uuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taskId       String?
+  task         Task?     @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  eventId      String?
+  examId       String?
+  type         String    @default("DEADLINE_REMINDER") // DEADLINE_REMINDER, URGENT_DEADLINE, OVERDUE_ALERT, EXAM_REMINDER, RESCHEDULED_EVENT, CANCELLED_EVENT, UPDATED_ACADEMIC_ITEM, WORKLOAD_ALERT, DAILY_DIGEST, PLAN_SUGGESTION
+  status       String    @default("SCHEDULED") // SCHEDULED, SENT, READ, DISMISSED, CANCELLED
+  stage        String?   // 7D, 48H, 24H, 12H, OVERDUE, CHANGE, DIGEST
+  dedupKey     String?   // Unique key for deduplication e.g. "task:uuid:12H:2026-09-21"
+  title        String
+  message      String
+  urgency      String    @default("NORMAL") // INFO, NORMAL, URGENT, CRITICAL
+  channel      String    @default("IN_APP")  // IN_APP, BROWSER, EMAIL
+  scheduledFor DateTime  @default(now())
+  isRead       Boolean   @default(false)
+  sentAt       DateTime?
+  readAt       DateTime?
+  dismissedAt  DateTime?
+  reasoning    String?   // Explainable alert justification
+  metadata     String?   // JSON metadata (why bullets, courseCode, actionUrl, etc.)
+  createdAt    DateTime  @default(now())
+
+  @@index([userId, status])
+  @@index([dedupKey])
+  @@map("notifications")
+}
+
+model ChatSession {
+  id        String        @id @default(uuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String        @default("Academic Consultation")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // Relations
+  messages  ChatMessage[]
+  memories  ChatMemory[]
+
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id         String      @id @default(uuid())
+  sessionId  String
+  session    ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role       String      // "user", "assistant", "tool"
+  content    String
+  toolCalls  String?     // JSON string of executed tools
+  citations  String?     // JSON array of source evidence references
+  createdAt  DateTime    @default(now())
+
+  @@map("chat_messages")
+}
+
+model ChatMemory {
+  id        String      @id @default(uuid())
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  key       String      // memory key e.g. "preferred_exam_focus"
+  value     String
+  createdAt DateTime    @default(now())
+
+  @@map("chat_memories")
+}
+
+model PlannerState {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planDate       DateTime @default(now())
+  scheduleJson   String   // structured JSON plan: [{ time: "18:00", task: "NLP Report", duration: 90 }]
+  workloadScore  Float    @default(0.0)
+  createdAt      DateTime @default(now())
+
+  @@map("planner_states")
+}
+
+model EmbeddingStore {
+  id         String   @id @default(uuid())
+  itemType   String   // "source", "task", "course"
+  itemId     String
+  vector     String   // Serialized float array for Milestone 1; can transition to pgvector in future
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  @@index([itemType, itemId])
+  @@map("embeddings")
+}
+
+model AcademicAuditLog {
+  id            String          @id @default(uuid())
+  targetType    String          // "TASK", "EVENT", "EXAM"
+  targetId      String          // foreign key id of task/event/exam
+  sourceId      String?         // foreign key of the incoming AcademicSource
+  source        AcademicSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  relationship  String          // "NEW", "DUPLICATE", "UPDATED", "RESCHEDULED", "CANCELLED"
+  changedFields String?         // JSON string array of field diffs: [{ field, oldValue, newValue, reason }]
+  reasons       String?         // JSON string array of explanation reasons
+  actionTaken   String          // "CREATED", "UPDATED", "RESCHEDULED", "CANCELLED", "DUPLICATE_IGNORED", "IGNORED"
+  createdAt     DateTime        @default(now())
+
+  @@index([targetType, targetId])
+  @@map("academic_audit_logs")
+}
+
+model Syllabus {
+  id                  String   @id @default(uuid())
+  courseId            String
+  courseCode          String
+  title               String
+  semester            String   @default("Fall 2026-27")
+  facultyId           String?
+  sourceFilename      String?
+  rawText             String
+  modulesJson         String   // JSON string of ModuleItem[]: { moduleNumber, title, topics, hours }
+  courseOutcomesJson  String?  // JSON string of string[]: ["CO1: ...", "CO2: ..."]
+  assessmentsJson     String?  // JSON string of { component, weight }[]
+  version             Int      @default(1)
+  isVerified          Boolean  @default(true)
+  isArchived          Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  course              Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  faculty             User?    @relation(fields: [facultyId], references: [id], onDelete: SetNull)
+
+  @@index([courseId])
+  @@index([courseCode])
+  @@map("syllabi")
+}
+
+model Rubric {
+  id             String   @id @default(uuid())
+  courseId       String
+  courseCode     String
+  taskId         String?
+  taskTitle      String   // e.g. "Capstone Project", "Assignment 2"
+  title          String   // e.g. "CSE4001 NLP Capstone Project Rubric"
+  totalMarks     Float    @default(100)
+  sourceDocument String?
+  criteriaJson   String   // JSON string of RubricRequirement[]: { id, title, marks, description, status }
+  guidelinesJson String?  // JSON string of submission guidelines, penalty rules, etc.
+  version        Int      @default(1)
+  isVerified     Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  course         Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  task           Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  author         User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId       String?
+
+  @@index([courseId])
+  @@index([courseCode])
+  @@map("rubrics")
+}

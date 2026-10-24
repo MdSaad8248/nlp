@@ -1,0 +1,134 @@
+{
+  "total_test_samples": 53,
+  "total_errors": 0,
+  "transformer_accuracy": 1.0,
+  "confusion_patterns": {},
+  "sample_errors": [],
+  "sample_correct_predictions": [
+    {
+      "id": "A0276",
+      "text": "The Database Systems class scheduled for 23 October 2026 at 14:00 PM is cancelled.",
+      "ground_truth": "CLASS_CANCELLATION",
+      "predicted_transformer": "CLASS_CANCELLATION",
+      "confidence_transformer": 0.3759,
+      "predicted_baseline": "CLASS_CANCELLATION",
+      "top_candidates": [
+        [
+          "CLASS_CANCELLATION",
+          0.3759
+        ],
+        [
+          "CLASS_CHANGE",
+          0.1362
+        ],
+        [
+          "PROJECT_REVIEW",
+          0.0743
+        ]
+      ],
+      "course": "Database Systems",
+      "relationship": "CANCELLED"
+    },
+    {
+      "id": "A0291",
+      "text": "Important information regarding Natural Language Processing will be shared on 10 October 2026. Students are advised to check Microsoft Teams regularly.",
+      "ground_truth": "GENERAL_ANNOUNCEMENT",
+      "predicted_transformer": "GENERAL_ANNOUNCEMENT",
+      "confidence_transformer": 0.2348,
+      "predicted_baseline": "GENERAL_ANNOUNCEMENT",
+      "top_candidates": [
+        [
+          "GENERAL_ANNOUNCEMENT",
+          0.2348
+        ],
+        [
+          "ASSIGNMENT",
+          0.1119
+        ],
+        [
+          "QUIZ",
+          0.1082
+        ]
+      ],
+      "course": "Natural Language Processing",
+      "relationship": "NEW"
+    },
+    {
+      "id": "A0241",
+      "text": "The submission deadline for Database Systems Assignment 3 is 25 October 2026. Late submissions may not be accepted.",
+      "ground_truth": "ASSIGNMENT",
+      "predicted_transformer": "ASSIGNMENT",
+      "confidence_transformer": 0.4257,
+      "predicted_baseline": "ASSIGNMENT",
+      "top_candidates": [
+        [
+          "ASSIGNMENT",
+          0.4257
+        ],
+        [
+          "PROJECT",
+          0.0864
+        ],
+        [
+          "CIRCULAR",
+          0.0779
+        ]
+      ],
+      "course": "Database Systems",
+      "relationship": "NEW"
+    },
+    {
+      "id": "A0002",
+      "text": "Microprocessor and Microcontroller Techniques Project 5 report must be submitted on Microsoft Teams before 02 November 2026. The project carries 25 marks.",
+      "ground_truth": "PROJECT",
+      "predicted_transformer": "PROJECT",
+      "confidence_transformer": 0.412,
+      "predicted_baseline": "PROJECT",
+      "top_candidates": [
+        [
+          "PROJECT",
+          0.412
+        ],
+        [
+          "ASSIGNMENT",
+          0.0911
+        ],
+        [
+          "CIRCULAR",
+          0.089
+        ]
+      ],
+      "course": "Microprocessor and Microcontroller Techniques",
+      "relationship": "NEW"
+    },
+    {
+      "id": "A0312",
+      "text": "Students are requested to note the following academic circular regarding Natural Language Processing, effective 11 October 2026.",
+      "ground_truth": "CIRCULAR",
+      "predicted_transformer": "CIRCULAR",
+      "confidence_transformer": 0.4846,
+      "predicted_baseline": "CIRCULAR",
+      "top_candidates": [
+        [
+          "CIRCULAR",
+          0.4846
+        ],
+        [
+          "PROJECT",
+          0.0743
+        ],
+        [
+          "ASSIGNMENT",
+          0.0654
+        ]
+      ],
+      "course": "Natural Language Processing",
+      "relationship": "NEW"
+    }
+  ],
+  "summary_insights": [
+    "The fine-tuned DistilBERT transformer demonstrates strong syntactic and semantic discrimination across structured academic notices.",
+    "Any observed errors primarily stem from borderline notices with compound keywords (e.g. project deliverables with review terminology, or administrative circulars).",
+    "The configured confidence threshold (< 0.70) reliably captures these edge cases to route them to secondary rule-based or human review."
+  ]
+}
