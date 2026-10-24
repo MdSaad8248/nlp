@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { ensureDefaultUserAndCourses } from "@/lib/services/user.service";
+import { getAuthenticatedUser } from "@/lib/auth/session-service";
 
 /**
  * POST /api/ingest/confirm
@@ -55,7 +56,10 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Ensure user and core courses exist
-    const { userId, courses } = await ensureDefaultUserAndCourses();
+    const defaultData = await ensureDefaultUserAndCourses();
+    const authUser = await getAuthenticatedUser(req);
+    const userId = authUser ? authUser.id : defaultData.userId;
+    const courses = defaultData.courses;
 
     // Helper to resolve or dynamically create a course
     const resolveCourseId = async (courseCode?: string | null, courseName?: string | null): Promise<string | null> => {

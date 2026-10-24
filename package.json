@@ -7,9 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:push": "node --env-file=.env.local ./node_modules/prisma/build/index.js db push",
-    "db:generate": "node --env-file=.env.local ./node_modules/prisma/build/index.js generate",
-    "db:studio": "node --env-file=.env.local ./node_modules/prisma/build/index.js studio"
+    "test": "npx tsx scripts/test-all.ts",
+    "test:all": "npx tsx scripts/test-all.ts",
+    "test:auth": "npx tsx scripts/test-auth-isolation.ts",
+    "test:eval": "npx tsx scripts/test-milestone8-final-evaluation.ts",
+    "seed": "npx tsx scripts/cleanup-and-seed-demo.ts",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^6.4.1",
