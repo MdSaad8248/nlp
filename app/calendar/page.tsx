@@ -16,6 +16,7 @@ import {
   X,
   BookOpen,
 } from "lucide-react";
+import { formatTaskTitle, formatDescription } from "@/lib/utils/formatters";
 
 interface CalendarItem {
   id: string;
@@ -35,6 +36,8 @@ export default function CalendarPage() {
   const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
   const [conflict, setConflict] = useState<any | null>(null);
   const [selectedItem, setSelectedItem] = useState<CalendarItem | null>(null);
+  // Default anchor date: 31 October 2026
+  const [currentDate, setCurrentDate] = useState<Date>(new Date(2026, 9, 31));
 
   useEffect(() => {
     async function loadData() {
@@ -51,14 +54,14 @@ export default function CalendarPage() {
             if (t.deadline) {
               items.push({
                 id: t.id,
-                title: t.title,
+                title: formatTaskTitle(t.title, t.course?.code),
                 type: t.category === "EXAM" ? "EXAM" : "ASSIGNMENT",
                 date: t.deadline.slice(0, 10),
                 timeStr: t.normalizedDeadline || new Date(t.deadline).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
                 courseCode: t.course?.code || "GEN",
                 priority: t.priority,
                 normalizedDeadline: t.normalizedDeadline,
-                description: t.description,
+                description: t.description ? formatDescription(t.description) : undefined,
               });
             }
           });
@@ -68,13 +71,13 @@ export default function CalendarPage() {
           eventsRes.events.forEach((e: any) => {
             items.push({
               id: e.id,
-              title: e.title,
+              title: formatTaskTitle(e.title, e.course?.code),
               type: e.eventType === "TIMETABLE" ? "TIMETABLE" : "EVENT",
               date: e.startTime.slice(0, 10),
               timeStr: new Date(e.startTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
               courseCode: e.course?.code || "GEN",
               venue: e.venue || "Campus Venue",
-              description: e.description,
+              description: e.description ? formatDescription(e.description) : undefined,
             });
           });
         }
@@ -85,7 +88,7 @@ export default function CalendarPage() {
             id: "tt-1",
             title: "NLP Theory Lecture",
             type: "TIMETABLE",
-            date: "2026-09-21",
+            date: "2026-10-28",
             timeStr: "08:30 AM - 10:00 AM",
             courseCode: "CSE4001",
             venue: "SJT 402",
@@ -337,140 +340,249 @@ export default function CalendarPage() {
       )}
 
       {/* WEEK VIEW */}
-      {viewMode === "week" && (
-        <div className="card-clean">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "0.5rem", marginBottom: "0.75rem", textAlign: "center", fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 600 }}>
-            <div>Mon 21</div>
-            <div>Tue 22</div>
-            <div>Wed 23</div>
-            <div>Thu 24</div>
-            <div>Fri 25</div>
-            <div>Sat 26</div>
-            <div>Sun 27</div>
-          </div>
+      {viewMode === "week" && (() => {
+        const curr = new Date(currentDate);
+        const dayOfWeek = curr.getDay(); // 0 = Sun
+        const sunday = new Date(curr);
+        sunday.setDate(curr.getDate() - dayOfWeek);
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "0.5rem" }}>
-            {[21, 22, 23, 24, 25, 26, 27].map((day, idx) => {
-              const dayStr = `2026-09-${day}`;
-              const dayItems = calendarItems.filter((i) => i.date.endsWith(day.toString()));
-              const isToday = day === 22;
+        const weekDays = Array.from({ length: 7 }, (_, i) => {
+          const d = new Date(sunday);
+          d.setDate(sunday.getDate() + i);
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, "0");
+          const dayNum = String(d.getDate()).padStart(2, "0");
+          const dateStr = `${y}-${m}-${dayNum}`;
+          const isToday = dateStr === "2026-10-31";
+          return {
+            dateObj: d,
+            dateStr,
+            dayLabel: d.toLocaleDateString("en-US", { weekday: "short" }),
+            dayNumber: d.getDate(),
+            monthLabel: d.toLocaleDateString("en-US", { month: "short" }),
+            isToday,
+          };
+        });
 
-              return (
-                <div
-                  key={idx}
-                  style={{
-                    minHeight: "140px",
-                    background: "var(--bg-surface-elevated)",
-                    border: `1px solid ${isToday ? "var(--accent-primary)" : "var(--border-subtle)"}`,
-                    borderRadius: "var(--radius-xs)",
-                    padding: "0.5rem",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.35rem",
+        return (
+          <div className="card-clean">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => {
+                    const prev = new Date(currentDate);
+                    prev.setDate(prev.getDate() - 7);
+                    setCurrentDate(prev);
                   }}
+                  title="Previous Week"
                 >
-                  <div style={{ fontSize: "0.72rem", fontWeight: 700, color: isToday ? "var(--accent-primary)" : "var(--text-muted)", marginBottom: "0.2rem" }}>
-                    Sep {day} {isToday && "• Due"}
-                  </div>
+                  <ChevronLeft size={16} />
+                </button>
+                <span style={{ fontSize: "0.92rem", fontWeight: 700 }}>
+                  Week of {weekDays[0].monthLabel} {weekDays[0].dayNumber} – {weekDays[6].monthLabel} {weekDays[6].dayNumber}, {weekDays[6].dateObj.getFullYear()}
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => {
+                    const next = new Date(currentDate);
+                    next.setDate(next.getDate() + 7);
+                    setCurrentDate(next);
+                  }}
+                  title="Next Week"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setCurrentDate(new Date(2026, 9, 31))}
+              >
+                Today (Oct 31)
+              </button>
+            </div>
 
-                  {dayItems.map((item) => {
-                    const style = getTypeStyle(item.type);
-                    return (
-                      <div
-                        key={item.id}
-                        onClick={() => setSelectedItem(item)}
-                        style={{
-                          padding: "0.3rem 0.45rem",
-                          borderRadius: "3px",
-                          background: style.bg,
-                          border: `1px solid ${style.border}`,
-                          fontSize: "0.68rem",
-                          fontWeight: 600,
-                          color: style.color,
-                          cursor: "pointer",
-                        }}
-                        title={item.title}
-                      >
-                        <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {item.title}
-                        </div>
-                        <div style={{ fontSize: "0.62rem", opacity: 0.8 }}>{item.courseCode}</div>
-                      </div>
-                    );
-                  })}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "0.5rem", marginBottom: "0.75rem", textAlign: "center", fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 600 }}>
+              {weekDays.map((w, idx) => (
+                <div key={idx} style={{ color: w.isToday ? "var(--accent-primary)" : "inherit" }}>
+                  {w.dayLabel} {w.dayNumber}
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+              ))}
+            </div>
 
-      {/* MONTH VIEW */}
-      {viewMode === "month" && (
-        <div className="card-clean">
-          <div className="card-header-clean">
-            <span style={{ fontSize: "0.9rem", fontWeight: 700 }}>September 2026</span>
-            <span className="badge badge-neutral">Syllabus Calendar</span>
-          </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "0.5rem" }}>
+              {weekDays.map((w, idx) => {
+                const dayItems = calendarItems.filter((i) => i.date === w.dateStr);
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "0.4rem", textAlign: "center", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 600, marginBottom: "0.4rem" }}>
-            <div>Sun</div>
-            <div>Mon</div>
-            <div>Tue</div>
-            <div>Wed</div>
-            <div>Thu</div>
-            <div>Fri</div>
-            <div>Sat</div>
-          </div>
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      minHeight: "140px",
+                      background: "var(--bg-surface-elevated)",
+                      border: `1px solid ${w.isToday ? "var(--accent-primary)" : "var(--border-subtle)"}`,
+                      borderRadius: "var(--radius-xs)",
+                      padding: "0.5rem",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.35rem",
+                    }}
+                  >
+                    <div style={{ fontSize: "0.72rem", fontWeight: 700, color: w.isToday ? "var(--accent-primary)" : "var(--text-muted)", marginBottom: "0.2rem" }}>
+                      {w.monthLabel} {w.dayNumber} {w.isToday && "• Today"}
+                    </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "0.4rem" }}>
-            {Array.from({ length: 30 }, (_, i) => i + 1).map((day) => {
-              const dayStr = day < 10 ? `0${day}` : `${day}`;
-              const dayItems = calendarItems.filter((item) => item.date.endsWith(dayStr));
-              const hasItems = dayItems.length > 0;
-
-              return (
-                <div
-                  key={day}
-                  style={{
-                    minHeight: "55px",
-                    background: day === 22 ? "rgba(99, 102, 241, 0.08)" : "var(--bg-surface-elevated)",
-                    border: `1px solid ${day === 22 ? "var(--accent-primary)" : "var(--border-subtle)"}`,
-                    borderRadius: "var(--radius-xs)",
-                    padding: "0.3rem",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <div style={{ fontSize: "0.7rem", fontWeight: 600, color: day === 22 ? "var(--accent-primary)" : "var(--text-muted)" }}>
-                    {day}
-                  </div>
-
-                  {hasItems && (
-                    <div style={{ display: "flex", gap: "2px", flexWrap: "wrap" }}>
-                      {dayItems.map((item, idx) => (
-                        <span
-                          key={idx}
+                    {dayItems.map((item) => {
+                      const style = getTypeStyle(item.type);
+                      return (
+                        <div
+                          key={item.id}
                           onClick={() => setSelectedItem(item)}
                           style={{
-                            width: "6px",
-                            height: "6px",
-                            borderRadius: "50%",
-                            background: getTypeStyle(item.type).color,
+                            padding: "0.3rem 0.45rem",
+                            borderRadius: "3px",
+                            background: style.bg,
+                            border: `1px solid ${style.border}`,
+                            fontSize: "0.68rem",
+                            fontWeight: 600,
+                            color: style.color,
                             cursor: "pointer",
                           }}
                           title={item.title}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                        >
+                          <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {item.title}
+                          </div>
+                          <div style={{ fontSize: "0.62rem", opacity: 0.8 }}>{item.courseCode}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
+
+      {/* MONTH VIEW */}
+      {viewMode === "month" && (() => {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const monthName = currentDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+        const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0 = Sun
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        return (
+          <div className="card-clean">
+            <div className="card-header-clean" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setCurrentDate(new Date(year, month - 1, 1))}
+                  title="Previous Month"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <span style={{ fontSize: "0.95rem", fontWeight: 700 }}>{monthName}</span>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setCurrentDate(new Date(year, month + 1, 1))}
+                  title="Next Month"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setCurrentDate(new Date(2026, 9, 31))}
+                >
+                  Today (Oct 31)
+                </button>
+                <span className="badge badge-neutral">Syllabus Calendar</span>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "0.4rem", textAlign: "center", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 600, marginBottom: "0.4rem" }}>
+              <div>Sun</div>
+              <div>Mon</div>
+              <div>Tue</div>
+              <div>Wed</div>
+              <div>Thu</div>
+              <div>Fri</div>
+              <div>Sat</div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "0.4rem" }}>
+              {/* Spacer empty cells for padding before the 1st of month */}
+              {Array.from({ length: firstDayOfWeek }).map((_, idx) => (
+                <div key={`empty-${idx}`} style={{ minHeight: "55px", opacity: 0.2 }} />
+              ))}
+
+              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
+                const dayStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                const dayItems = calendarItems.filter((item) => item.date === dayStr);
+                const hasItems = dayItems.length > 0;
+                const isToday = dayStr === "2026-10-31";
+
+                return (
+                  <div
+                    key={day}
+                    style={{
+                      minHeight: "55px",
+                      background: isToday ? "rgba(99, 102, 241, 0.12)" : "var(--bg-surface-elevated)",
+                      border: `1px solid ${isToday ? "var(--accent-primary)" : "var(--border-subtle)"}`,
+                      borderRadius: "var(--radius-xs)",
+                      padding: "0.3rem",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: "0.7rem", fontWeight: isToday ? 700 : 500, color: isToday ? "var(--accent-primary)" : "var(--text-muted)" }}>
+                        {day}
+                      </span>
+                      {isToday && (
+                        <span style={{ fontSize: "0.58rem", fontWeight: 700, color: "var(--accent-primary)", background: "rgba(99, 102, 241, 0.2)", padding: "1px 3px", borderRadius: "2px" }}>
+                          TODAY
+                        </span>
+                      )}
+                    </div>
+
+                    {hasItems && (
+                      <div style={{ display: "flex", gap: "2px", flexWrap: "wrap", marginTop: "2px" }}>
+                        {dayItems.map((item, idx) => (
+                          <span
+                            key={idx}
+                            onClick={() => setSelectedItem(item)}
+                            style={{
+                              width: "6px",
+                              height: "6px",
+                              borderRadius: "50%",
+                              background: getTypeStyle(item.type).color,
+                              cursor: "pointer",
+                            }}
+                            title={`${item.courseCode}: ${item.title}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Item Details Modal */}
       {selectedItem && (

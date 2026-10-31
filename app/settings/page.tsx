@@ -47,8 +47,8 @@ export default function SettingsPage() {
               letterSpacing: "0.08em",
               padding: "0.15rem 0.5rem",
               borderRadius: "4px",
-              background: "rgba(37, 99, 235, 0.1)",
-              color: "#2563eb",
+              background: "rgba(52, 72, 165, 0.08)",
+              color: "#3448A5",
             }}
           >
             Preferences
@@ -101,7 +101,7 @@ export default function SettingsPage() {
               width: "48px",
               height: "48px",
               borderRadius: "50%",
-              background: session.role === "TEACHER" ? "#7c3aed" : "#2563eb",
+              background: session.role === "TEACHER" ? "#B88A45" : "#3448A5",
               color: "#ffffff",
               display: "flex",
               alignItems: "center",
@@ -247,13 +247,13 @@ export default function SettingsPage() {
             gap: "0.5rem",
             padding: "0.75rem 1.5rem",
             borderRadius: "8px",
-            background: "#2563eb",
+            background: "#3448A5",
             color: "#ffffff",
             border: "none",
             fontWeight: 700,
             fontSize: "0.86rem",
             cursor: "pointer",
-            boxShadow: "0 2px 10px rgba(37, 99, 235, 0.3)",
+            boxShadow: "0 2px 10px rgba(52, 72, 165, 0.25)",
           }}
         >
           <Save size={16} />

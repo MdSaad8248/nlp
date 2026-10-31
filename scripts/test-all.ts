@@ -20,6 +20,12 @@ const SUITES: TestSuite[] = [
     category: "Security & Isolation",
   },
   {
+    id: "FACULTY",
+    name: "Faculty Identity, Course Scoping, Submissions & Review E2E",
+    command: "npx tsx scripts/test-faculty-workflows-e2e.ts",
+    category: "Faculty Workflows",
+  },
+  {
     id: "M2",
     name: "Academic NLP Extraction & Temporal Normalization",
     command: "npx tsx scripts/test-milestone2.ts",

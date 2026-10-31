@@ -35,6 +35,7 @@ interface SidebarProps {
   onClose: () => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  userRole?: "STUDENT" | "TEACHER";
 }
 
 interface NavItem {
@@ -50,19 +51,53 @@ export default function Sidebar({
   onClose,
   isCollapsed,
   onToggleCollapse,
+  userRole,
 }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [session, setSession] = useState<UserSession>(getCurrentSession());
+
+  // Deterministic initial session matching route context
+  const isFacultyPath = pathname ? (pathname.startsWith("/faculty-") || pathname === "/evaluation" || pathname === "/submissions") : false;
+  const initialSession = userRole === "TEACHER" || isFacultyPath ? DEMO_TEACHERS[0] : DEMO_STUDENTS[0];
+  const [session, setSession] = useState<UserSession>(initialSession);
+  const [mounted, setMounted] = useState(false);
   const [unreadCount, setUnreadCount] = useState<number>(3);
 
   // Sync session on mount / path change
   useEffect(() => {
-    const cookies = document.cookie.split("; ");
-    const studentCookie = cookies.find((c) => c.startsWith("academic_student_id="));
-    const studentId = studentCookie ? decodeURIComponent(studentCookie.split("=")[1]) : null;
-    const current = getCurrentSession(studentId);
-    setSession(current);
+    setMounted(true);
+
+    fetch("/api/auth")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          const u = data.user;
+          const userSession: UserSession = {
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            role: u.role,
+            rollNumber: u.rollNumber || "",
+            department: u.department || "",
+            program: u.program || "",
+            assignedCourses: u.managedCourseCodes || [],
+          };
+          setSession(userSession);
+        } else {
+          const cookies = document.cookie.split("; ");
+          const studentCookie = cookies.find((c) => c.startsWith("academic_student_id="));
+          const studentId = studentCookie ? decodeURIComponent(studentCookie.split("=")[1]) : null;
+          const current = getCurrentSession(studentId);
+          setSession(current);
+        }
+      })
+      .catch(() => {
+        const cookies = document.cookie.split("; ");
+        const studentCookie = cookies.find((c) => c.startsWith("academic_student_id="));
+        const studentId = studentCookie ? decodeURIComponent(studentCookie.split("=")[1]) : null;
+        const current = getCurrentSession(studentId);
+        setSession(current);
+      });
 
     // Fetch live notifications count
     fetch("/api/notifications?status=SCHEDULED&limit=20")
@@ -84,136 +119,118 @@ export default function Sidebar({
     router.refresh();
   };
 
-  const isTeacher = session.role === "TEACHER";
+  // Deterministic role evaluation: identical on SSR and client initial hydration
+  const isTeacher = userRole
+    ? userRole === "TEACHER"
+    : (isFacultyPath || (mounted && session.role === "TEACHER"));
 
-  const WORKSPACE_NAV: NavItem[] = [
+  // Student-specific navigation items matching reference image
+  const STUDENT_NAV: NavItem[] = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Ingest Notice", href: "/inbox", icon: Inbox, badge: "NLP" },
-    { name: "Tasks", href: "/tasks", icon: CheckSquare },
+    { name: "My Tasks", href: "/tasks", icon: CheckSquare },
     { name: "Calendar", href: "/calendar", icon: Calendar },
     { name: "Courses", href: "/courses", icon: BookOpen },
-  ];
-
-  const INTELLIGENCE_NAV: NavItem[] = [
     {
       name: "Notifications",
       href: "/notifications",
       icon: Bell,
-      badge: unreadCount > 0 ? String(unreadCount) : undefined,
-      badgeColor: "#ef4444",
+      badge: unreadCount > 0 ? String(unreadCount) : "3",
+      badgeColor: "#EF4444",
     },
+    { name: "Inbox", href: "/inbox", icon: Inbox },
     { name: "Analytics", href: "/analytics", icon: BarChart3 },
-    { name: "AI Assistant", href: "/assistant", icon: Bot, badge: "PRO", badgeColor: "#6366f1" },
+    { name: "Syllabus", href: "/syllabus", icon: ScrollText },
+    { name: "Rubrics", href: "/rubrics", icon: FileCheck2 },
+    { name: "Documents", href: "/documents", icon: FileText },
+    { name: "AI Assistant", href: "/assistant", icon: Bot },
   ];
 
-  const RESOURCES_NAV: NavItem[] = [
-    { name: "Syllabus", href: "/syllabus", icon: ScrollText, badge: "NEW" },
-    { name: "Rubric Intelligence", href: "/rubrics", icon: FileCheck2 },
-    { name: "Documents & OCR", href: "/documents", icon: FileText },
+  // Faculty-specific navigation items matching reference image + Student Dataset
+  const FACULTY_NAV: NavItem[] = [
+    { name: "Dashboard", href: "/faculty-course-intelligence", icon: LayoutDashboard },
+    { name: "Courses", href: "/courses", icon: BookOpen },
+    { name: "Submissions", href: "/submissions", icon: CheckSquare },
+    { name: "Faculty Review", href: "/faculty-review", icon: GraduationCap },
+    { name: "Student Dataset", href: "/faculty-dataset", icon: Users, badge: "NEW", badgeColor: "#4658C8" },
+    { name: "Analytics", href: "/analytics", icon: BarChart3 },
+    { name: "Evaluation", href: "/evaluation", icon: FlaskConical },
+    { name: "Syllabus", href: "/syllabus", icon: ScrollText },
+    { name: "Rubrics", href: "/rubrics", icon: FileCheck2 },
+    { name: "Documents", href: "/documents", icon: FileText },
+    { name: "Inbox", href: "/inbox", icon: Inbox },
   ];
 
-  const TEACHER_NAV: NavItem[] = [
-    { name: "Teacher Dashboard", href: "/faculty-course-intelligence", icon: Users, badge: "COHORT" },
-    { name: "Defense Review", href: "/faculty-review", icon: GraduationCap, badge: "DEMO" },
-    { name: "Model Benchmark", href: "/evaluation", icon: FlaskConical },
-  ];
+  const renderNavList = (items: NavItem[]) => (
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+      {items.map((item) => {
+        const Icon = item.icon;
+        const isActive =
+          pathname === item.href ||
+          (item.href !== "/dashboard" &&
+            item.href !== "/faculty-course-intelligence" &&
+            pathname?.startsWith(item.href));
 
-  const ACCOUNT_NAV: NavItem[] = [
-    { name: "Settings", href: "/settings", icon: Settings },
-    { name: "About & Defense", href: "/about", icon: Info },
-  ];
-
-  const renderNavGroup = (title: string, items: NavItem[]) => (
-    <div className="sidebar-group" style={{ marginBottom: "1.25rem" }}>
-      {!isCollapsed && (
-        <div
-          style={{
-            padding: "0 0.85rem 0.45rem",
-            fontSize: "0.68rem",
-            fontWeight: 700,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: "#64748b",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <span>{title}</span>
-        </div>
-      )}
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
-        {items.map((item) => {
-          const Icon = item.icon;
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/dashboard" && pathname?.startsWith(item.href));
-
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onClose}
-              title={isCollapsed ? item.name : undefined}
-              className={`sidebar-link ${isActive ? "active" : ""}`}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: isCollapsed ? "center" : "space-between",
-                padding: isCollapsed ? "0.65rem 0" : "0.55rem 0.85rem",
-                borderRadius: "8px",
-                color: isActive ? "#ffffff" : "#94a3b8",
-                background: isActive ? "rgba(59, 130, 246, 0.16)" : "transparent",
-                borderLeft: isActive ? "3px solid #3b82f6" : "3px solid transparent",
-                fontWeight: isActive ? 600 : 500,
-                fontSize: "0.84rem",
-                textDecoration: "none",
-                transition: "all 0.15s ease",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", minWidth: 0 }}>
-                <Icon
-                  size={17}
-                  style={{
-                    color: isActive ? "#3b82f6" : "#94a3b8",
-                    flexShrink: 0,
-                  }}
-                />
-                {!isCollapsed && (
-                  <span
-                    style={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {item.name}
-                  </span>
-                )}
-              </div>
-              {!isCollapsed && item.badge && (
+        return (
+          <Link
+            key={item.name + item.href}
+            href={item.href}
+            onClick={onClose}
+            title={isCollapsed ? item.name : undefined}
+            className={`sidebar-link ${isActive ? "active" : ""}`}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: isCollapsed ? "center" : "space-between",
+              padding: isCollapsed ? "0.65rem 0" : "0.62rem 0.95rem",
+              borderRadius: "8px",
+              color: isActive ? "#ffffff" : "#8F9CAE",
+              background: isActive ? "#4658C8" : "transparent",
+              fontWeight: isActive ? 600 : 500,
+              fontSize: "0.88rem",
+              textDecoration: "none",
+              transition: "all 0.15s ease",
+              boxShadow: isActive ? "0 2px 8px rgba(70, 88, 200, 0.35)" : "none",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "0.85rem", minWidth: 0 }}>
+              <Icon
+                size={18}
+                style={{
+                  color: isActive ? "#ffffff" : "#8F9CAE",
+                  flexShrink: 0,
+                }}
+              />
+              {!isCollapsed && (
                 <span
                   style={{
-                    fontSize: "0.62rem",
-                    fontWeight: 700,
-                    letterSpacing: "0.04em",
-                    padding: "0.15rem 0.4rem",
-                    borderRadius: "999px",
-                    background: item.badgeColor
-                      ? `${item.badgeColor}22`
-                      : "rgba(59, 130, 246, 0.15)",
-                    color: item.badgeColor || "#60a5fa",
-                    border: `1px solid ${item.badgeColor ? `${item.badgeColor}44` : "rgba(59, 130, 246, 0.3)"}`,
-                    marginLeft: "0.5rem",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
                 >
-                  {item.badge}
+                  {item.name}
                 </span>
               )}
-            </Link>
-          );
-        })}
-      </div>
+            </div>
+            {!isCollapsed && item.badge && (
+              <span
+                style={{
+                  fontSize: "0.65rem",
+                  fontWeight: 700,
+                  lineHeight: 1,
+                  padding: "0.2rem 0.45rem",
+                  borderRadius: "999px",
+                  background: item.badgeColor || "#EF4444",
+                  color: "#ffffff",
+                  marginLeft: "0.5rem",
+                }}
+              >
+                {item.badge}
+              </span>
+            )}
+          </Link>
+        );
+      })}
     </div>
   );
 
@@ -238,8 +255,8 @@ export default function Sidebar({
         className={`sidebar-shell ${isOpen ? "mobile-open" : ""}`}
         style={{
           width: isCollapsed ? "72px" : "260px",
-          background: "#090d16",
-          borderRight: "1px solid #1e293b",
+          background: "#182447",
+          borderRight: "1px solid rgba(255, 255, 255, 0.08)",
           display: "flex",
           flexDirection: "column",
           position: "fixed",
@@ -248,18 +265,18 @@ export default function Sidebar({
           left: 0,
           zIndex: 100,
           transition: "width 0.22s cubic-bezier(0.4, 0, 0.2, 1), transform 0.22s ease",
-          boxShadow: "4px 0 24px rgba(0, 0, 0, 0.3)",
+          boxShadow: "4px 0 24px rgba(0, 0, 0, 0.25)",
         }}
       >
         {/* Brand Header */}
         <div
           style={{
-            height: "64px",
+            height: "68px",
             display: "flex",
             alignItems: "center",
             justifyContent: isCollapsed ? "center" : "space-between",
-            padding: isCollapsed ? "0" : "0 1rem",
-            borderBottom: "1px solid #1e293b",
+            padding: isCollapsed ? "0" : "0 1.15rem",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
             flexShrink: 0,
           }}
         >
@@ -270,76 +287,67 @@ export default function Sidebar({
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "0.6rem",
+                gap: "0.75rem",
                 textDecoration: "none",
               }}
             >
               <div
                 style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "8px",
-                  background: isTeacher
-                    ? "linear-gradient(135deg, #8b5cf6, #6366f1)"
-                    : "linear-gradient(135deg, #2563eb, #3b82f6)",
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "10px",
+                  background: "#4658C8",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   color: "#ffffff",
-                  boxShadow: "0 2px 10px rgba(59, 130, 246, 0.3)",
+                  boxShadow: "0 2px 10px rgba(70, 88, 200, 0.35)",
                   flexShrink: 0,
                 }}
               >
-                {isTeacher ? <GraduationCap size={18} /> : <Sparkles size={18} />}
+                <GraduationCap size={20} />
               </div>
               <div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-display)",
-                      fontWeight: 700,
-                      fontSize: "1.05rem",
-                      color: "#f8fafc",
-                      letterSpacing: "-0.02em",
-                    }}
-                  >
-                    AcademicAI
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "0.55rem",
-                      fontWeight: 800,
-                      padding: "0.1rem 0.3rem",
-                      background: isTeacher ? "rgba(139, 92, 246, 0.2)" : "rgba(59, 130, 246, 0.2)",
-                      color: isTeacher ? "#c084fc" : "#60a5fa",
-                      borderRadius: "4px",
-                      border: `1px solid ${isTeacher ? "rgba(139, 92, 246, 0.4)" : "rgba(59, 130, 246, 0.4)"}`,
-                    }}
-                  >
-                    {isTeacher ? "FACULTY" : "PRO"}
-                  </span>
+                <div
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontWeight: 700,
+                    fontSize: "1.15rem",
+                    color: "#ffffff",
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.15,
+                  }}
+                >
+                  AcademicAI
                 </div>
-                <div style={{ fontSize: "0.68rem", color: "#64748b" }}>
-                  Intelligence Platform
+                <div
+                  style={{
+                    fontSize: "0.68rem",
+                    color: "#8F9CAE",
+                    letterSpacing: "-0.01em",
+                    marginTop: "2px",
+                  }}
+                >
+                  Smarter Learning, Brighter Future.
                 </div>
               </div>
             </Link>
           ) : (
             <Link
-              href="/dashboard"
+              href={isTeacher ? "/faculty-course-intelligence" : "/dashboard"}
               style={{
-                width: "34px",
-                height: "34px",
-                borderRadius: "8px",
-                background: "linear-gradient(135deg, #2563eb, #3b82f6)",
+                width: "36px",
+                height: "36px",
+                borderRadius: "10px",
+                background: "#4658C8",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 color: "#ffffff",
               }}
-              title="AcademicAI Home"
+              title={isTeacher ? "Faculty Dashboard" : "AcademicAI Home"}
             >
-              <Sparkles size={18} />
+              <GraduationCap size={20} />
             </Link>
           )}
 
@@ -358,9 +366,9 @@ export default function Sidebar({
                 width: "28px",
                 height: "28px",
                 borderRadius: "6px",
-                border: "1px solid #1e293b",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
                 background: "rgba(255, 255, 255, 0.04)",
-                color: "#94a3b8",
+                color: "#8F9CAE",
                 cursor: "pointer",
                 transition: "all 0.15s ease",
               }}
@@ -380,9 +388,9 @@ export default function Sidebar({
                 width: "28px",
                 height: "28px",
                 borderRadius: "6px",
-                border: "1px solid #1e293b",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
                 background: "transparent",
-                color: "#94a3b8",
+                color: "#8F9CAE",
                 cursor: "pointer",
               }}
             >
@@ -397,22 +405,18 @@ export default function Sidebar({
             flex: 1,
             overflowY: "auto",
             overflowX: "hidden",
-            padding: isCollapsed ? "1rem 0.4rem" : "1rem 0.65rem",
+            padding: isCollapsed ? "1rem 0.4rem" : "1rem 0.85rem",
           }}
         >
-          {renderNavGroup("Workspace", WORKSPACE_NAV)}
-          {renderNavGroup("Academic Intelligence", INTELLIGENCE_NAV)}
-          {renderNavGroup("Academic Resources", RESOURCES_NAV)}
-          {isTeacher && renderNavGroup("Teacher Workspace", TEACHER_NAV)}
-          {renderNavGroup("Account", ACCOUNT_NAV)}
+          {isTeacher ? renderNavList(FACULTY_NAV) : renderNavList(STUDENT_NAV)}
         </div>
 
-        {/* User Account / Footer */}
+        {/* User Account / Footer matching reference */}
         <div
           style={{
-            padding: isCollapsed ? "0.75rem 0.4rem" : "0.75rem 0.85rem",
-            borderTop: "1px solid #1e293b",
-            background: "#060910",
+            padding: isCollapsed ? "0.75rem 0.4rem" : "0.85rem 1rem",
+            borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+            background: "#182447",
             flexShrink: 0,
           }}
         >
@@ -421,31 +425,34 @@ export default function Sidebar({
               display: "flex",
               alignItems: "center",
               justifyContent: isCollapsed ? "center" : "space-between",
-              gap: "0.5rem",
+              padding: isCollapsed ? "0" : "0.55rem 0.75rem",
+              background: isCollapsed ? "transparent" : "rgba(255, 255, 255, 0.05)",
+              border: isCollapsed ? "none" : "1px solid rgba(255, 255, 255, 0.08)",
+              borderRadius: "10px",
             }}
           >
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "0.6rem",
+                gap: "0.65rem",
                 minWidth: 0,
               }}
             >
               <div
                 style={{
-                  width: "34px",
-                  height: "34px",
+                  width: "36px",
+                  height: "36px",
                   borderRadius: "50%",
-                  background: isTeacher ? "#7c3aed" : "#2563eb",
+                  background: isTeacher ? "#4658C8" : "#4658C8",
                   color: "#ffffff",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontWeight: 700,
-                  fontSize: "0.8rem",
+                  fontSize: "0.82rem",
                   flexShrink: 0,
-                  border: "2px solid rgba(255, 255, 255, 0.1)",
+                  border: "2px solid rgba(255, 255, 255, 0.15)",
                 }}
                 title={`${session.name} (${session.role})`}
               >
@@ -456,53 +463,52 @@ export default function Sidebar({
                 <div style={{ minWidth: 0, overflow: "hidden" }}>
                   <div
                     style={{
-                      fontSize: "0.82rem",
+                      fontSize: "0.85rem",
                       fontWeight: 600,
-                      color: "#f1f5f9",
+                      color: "#ffffff",
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                     }}
                   >
-                    {session.name}
+                    {session.name || (session.role === "TEACHER" ? "Faculty" : "Student")}
                   </div>
                   <div
                     style={{
-                      fontSize: "0.68rem",
-                      color: isTeacher ? "#c084fc" : "#94a3b8",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.25rem",
+                      fontSize: "0.72rem",
+                      color: "#8F9CAE",
+                      lineHeight: 1.2,
                     }}
                   >
-                    <span>{session.role}</span>
-                    <span>&bull;</span>
-                    <span>{session.rollNumber}</span>
+                    {session.role === "TEACHER" ? (session.department || "Faculty Member") : (session.program || "Student")}
                   </div>
                 </div>
               )}
             </div>
 
             {!isCollapsed && (
-              <button
-                type="button"
-                onClick={handleLogout}
-                title="Sign out / Switch user"
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "#ef4444",
-                  padding: "0.35rem",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "background 0.15s ease",
-                }}
-              >
-                <LogOut size={16} />
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  title="Sign out"
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: "#8F9CAE",
+                    padding: "0.25rem",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "color 0.15s ease",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#8F9CAE")}
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
             )}
           </div>
         </div>

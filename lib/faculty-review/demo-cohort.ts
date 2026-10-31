@@ -84,7 +84,7 @@ export function getDemoCourseCohort(): FacultyCohortAnalysis {
       name: `Student ${String.fromCharCode(65 + (i % 26))}${i > 26 ? " II" : ""}`,
       rollNumber: roll,
       submitted: isSubmitted,
-      submissionDate: isSubmitted ? "Sep 20, 2026, 08:30 PM (IST)" : undefined,
+      submissionDate: isSubmitted ? "Oct 24, 2026, 08:30 PM (IST)" : undefined,
       isOverdue,
       hasAssessmentIn48h,
       upcomingAssessmentName: hasAssessmentIn48h ? "CSE3002 ML Quiz 2" : undefined,

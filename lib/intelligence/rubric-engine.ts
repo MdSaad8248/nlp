@@ -449,8 +449,8 @@ export class RubricEngine {
 
     const h = summary.highestMarkRequirement;
     const share = summary.totalMarks > 0 ? Math.round(((h.marks || 0) / summary.totalMarks) * 100) : 0;
-
-    return `### HIGHEST WEIGHTAGE COMPONENT\n\n**${h.title}** carries the most marks in the **${rubric.title}** rubric:\n- **Marks:** **${h.marks} marks** (${share}% of total ${summary.totalMarks} marks)\n- **Status:** \`${h.status}\`\n- **Mandatory:** ${h.isMandatory ? "Yes" : "No"}\n\n*Source Evidence:* \`${h.sourceEvidence.snippet}\``;
+    const evidenceLine = h.sourceEvidence?.snippet ? `\n\n*Source Evidence:* \`${h.sourceEvidence.snippet}\`` : "";
+    return `### HIGHEST WEIGHTAGE COMPONENT\n\n**${h.title}** carries the most marks in the **${rubric.title}** rubric:\n- **Marks:** **${h.marks} marks** (${share}% of total ${summary.totalMarks} marks)\n- **Status:** \`${h.status || "PENDING"}\`\n- **Mandatory:** ${h.isMandatory ? "Yes" : "No"}${evidenceLine}`;
   }
 
   /**

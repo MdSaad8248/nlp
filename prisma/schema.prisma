@@ -98,15 +98,37 @@ model CourseFaculty {
 }
 
 model CourseEnrollment {
-  id        String   @id @default(uuid())
-  userId    String
-  courseId  String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  id               String   @id @default(uuid())
+  userId           String
+  courseId         String
+  section          String?  @default("A")
+  academicYear     String?  @default("2025-2026")
+  semester         Int      @default(8)
+  enrollmentStatus String   @default("ACTIVE") // "ACTIVE" | "DROPPED" | "AUDIT"
+  progress         Int      @default(0) // 0 - 100
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt @default(now())
 
   @@unique([userId, courseId])
   @@map("course_enrollments")
+}
+
+model DatasetImport {
+  id                 String   @id @default(uuid())
+  facultyId          String
+  filename           String
+  totalRows          Int      @default(0)
+  validRows          Int      @default(0)
+  createdStudents    Int      @default(0)
+  createdEnrollments Int      @default(0)
+  skippedRows        Int      @default(0)
+  status             String   @default("COMPLETED") // "COMPLETED" | "PARTIAL" | "FAILED"
+  summary            String?
+  createdAt          DateTime @default(now())
+
+  @@map("dataset_imports")
 }
 
 model AcademicSource {

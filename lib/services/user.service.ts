@@ -11,11 +11,13 @@ export async function ensureDefaultUserAndCourses(): Promise<{
   // 1. Ensure all core courses exist
   const coreCourses = [
     { code: "CSE4001", title: "Natural Language Processing", faculty: "Dr. P. Raman", credits: 4, slot: "A1+TA1", color: "#6366f1" },
-    { code: "CSE3002", title: "Machine Learning", faculty: "Dr. S. Kulkarni", credits: 4, slot: "B1+TB1", color: "#ec4899" },
+    { code: "CSE3002", title: "Machine Learning", faculty: "Dr. S. Kulkarni", credits: 4, slot: "B1+TB1", color: "#10b981" },
+    { code: "CSE2004", title: "Operating Systems", faculty: "Dr. K. Swaminathan", credits: 4, slot: "F1+TF1", color: "#f59e0b" },
+    { code: "CSE2010", title: "Web Technologies", faculty: "Prof. S. Das", credits: 3, slot: "G1+TG1", color: "#06b6d4" },
+    { code: "CSE2021", title: "Database Management Systems", faculty: "Prof. R. Nair", credits: 4, slot: "E1+TE1", color: "#ef4444" },
     { code: "CSE2001", title: "Computer Networks", faculty: "Prof. M. Verma", credits: 3, slot: "C1+TC1", color: "#06b6d4" },
     { code: "MAT2001", title: "Applied Statistics", faculty: "Dr. A. Sharma", credits: 3, slot: "D1+TD1", color: "#10b981" },
     { code: "CSE3001", title: "Database Management Systems", faculty: "Prof. R. Nair", credits: 4, slot: "E1+TE1", color: "#f59e0b" },
-    { code: "CSE2004", title: "Operating Systems", faculty: "Dr. K. Swaminathan", credits: 4, slot: "F1+TF1", color: "#8b5cf6" },
   ];
 
   const courseMap: Record<string, string> = {};
@@ -80,17 +82,26 @@ export async function ensureDefaultUserAndCourses(): Promise<{
 
     // Student-specific course enrollments
     let enrolledCodes: string[] = [];
+    const courseProgressMap: Record<string, number> = {
+      cse4001: 80,
+      cse3002: 65,
+      cse2004: 50,
+      cse2010: 60,
+      cse2021: 70,
+    };
+
     if (s.id === "student-academic-demo-01") {
-      enrolledCodes = ["CSE4001", "CSE3002", "CSE2001", "MAT2001"];
+      enrolledCodes = ["CSE4001", "CSE3002", "CSE2004", "CSE2010", "CSE2021", "CSE2001", "MAT2001"];
     } else if (s.id === "student-academic-demo-02") {
-      enrolledCodes = ["CSE3002", "CSE3001", "CSE2004"];
+      enrolledCodes = ["CSE4001", "CSE3002", "CSE3001", "CSE2004"];
     } else {
-      enrolledCodes = ["CSE2001", "MAT2001"];
+      enrolledCodes = ["CSE4001", "CSE3002", "CSE2004", "CSE2001", "MAT2001"];
     }
 
     for (const code of enrolledCodes) {
       const cId = courseMap[code.toLowerCase()];
       if (cId) {
+        const prog = courseProgressMap[code.toLowerCase()] ?? 65;
         await prisma.courseEnrollment.upsert({
           where: {
             userId_courseId: {
@@ -98,13 +109,70 @@ export async function ensureDefaultUserAndCourses(): Promise<{
               courseId: cId,
             },
           },
-          update: {},
+          update: {
+            progress: prog,
+          },
           create: {
             userId: user.id,
             courseId: cId,
+            progress: prog,
+            section: "A",
+            academicYear: "2025-2026",
+            semester: user.semester,
+            enrollmentStatus: "ACTIVE",
           },
         });
       }
+    }
+  }
+
+  // Seed sample student roster dataset matching reference image (S001 - S005)
+  const sampleStudents = [
+    { id: "S001", name: "Aarav Sharma", email: "aarav.sharma@academic.ai", course: "CSE4001", progress: 78, section: "A" },
+    { id: "S002", name: "Priya Nair", email: "priya.nair@academic.ai", course: "CSE3002", progress: 64, section: "A" },
+    { id: "S003", name: "Karthik R", email: "karthik.r@academic.ai", course: "CSE2004", progress: 85, section: "B" },
+    { id: "S004", name: "Sneha Patel", email: "sneha.patel@academic.ai", course: "CSE2010", progress: 72, section: "A" },
+    { id: "S005", Rohit: true, name: "Rohit Kumar", email: "rohit.kumar@academic.ai", course: "CSE4001", progress: 58, section: "C" },
+  ];
+
+  for (const stu of sampleStudents) {
+    const studentUser = await prisma.user.upsert({
+      where: { rollNumber: stu.id },
+      update: { name: stu.name, email: stu.email },
+      create: {
+        rollNumber: stu.id,
+        name: stu.name,
+        email: stu.email,
+        role: "STUDENT",
+        passwordHash: studentPasswordHash,
+        semester: 8,
+        program: "B.Tech Computer Science & Engineering",
+      },
+    });
+
+    const cId = courseMap[stu.course.toLowerCase()];
+    if (cId) {
+      await prisma.courseEnrollment.upsert({
+        where: {
+          userId_courseId: {
+            userId: studentUser.id,
+            courseId: cId,
+          },
+        },
+        update: {
+          progress: stu.progress,
+          section: stu.section,
+        },
+        create: {
+          userId: studentUser.id,
+          courseId: cId,
+          progress: stu.progress,
+          section: stu.section,
+          academicYear: "2025-2026",
+          semester: 8,
+          enrollmentStatus: "ACTIVE",
+        },
+      });
     }
   }
 
@@ -262,6 +330,213 @@ export async function ensureDefaultUserAndCourses(): Promise<{
         },
       ],
     });
+  }
+
+  // 4b. Ensure complete cohort deliverables exist for faculty assessment tracking
+  const nlpCourseId = courseMap["cse4001"];
+  const mlCourseId = courseMap["cse3002"];
+  const osCourseId = courseMap["cse2004"];
+
+  const cohortDeliverables = [
+    // CSE4001: Dr. P. Raman
+    {
+      id: "task-priya-nlp-assign1",
+      userId: "student-academic-demo-02",
+      courseId: nlpCourseId,
+      title: "[CSE4001] Assignment 1: Language Modeling & Tokenization",
+      category: "ASSIGNMENT",
+      deadline: new Date(Date.now() + 48 * 3600 * 1000),
+      normalizedDeadline: "In 2 days at 11:59 PM (IST)",
+      priority: "HIGH",
+      status: "IN_PROGRESS",
+      submissionPlatform: "VTOP",
+      weightage: 10,
+      estimatedHours: 4,
+      progressPct: 80,
+      progressNote: "Submitted via VTOP; awaiting faculty grading and rubric evaluation",
+    },
+    {
+      id: "task-arjun-nlp-assign1",
+      userId: "student-academic-demo-03",
+      courseId: nlpCourseId,
+      title: "[CSE4001] Assignment 1: Language Modeling & Tokenization",
+      category: "ASSIGNMENT",
+      deadline: new Date(Date.now() + 48 * 3600 * 1000),
+      normalizedDeadline: "In 2 days at 11:59 PM (IST)",
+      priority: "MEDIUM",
+      status: "PENDING",
+      submissionPlatform: "VTOP",
+      weightage: 10,
+      estimatedHours: 4,
+      progressPct: 0,
+      progressNote: null,
+    },
+    {
+      id: "task-priya-nlp-capstone",
+      userId: "student-academic-demo-02",
+      courseId: nlpCourseId,
+      title: "[CSE4001] Capstone Project Review 1",
+      category: "PROJECT_REVIEW",
+      deadline: new Date(Date.now() - 24 * 3600 * 1000),
+      normalizedDeadline: "Yesterday at 11:59 PM (IST)",
+      priority: "CRITICAL",
+      status: "OVERDUE",
+      submissionPlatform: "VTOP",
+      weightage: 20,
+      estimatedHours: 8,
+      progressPct: 0,
+      progressNote: "Deadline passed; missing literature survey upload",
+    },
+    {
+      id: "task-arjun-nlp-capstone",
+      userId: "student-academic-demo-03",
+      courseId: nlpCourseId,
+      title: "[CSE4001] Capstone Project Review 1",
+      category: "PROJECT_REVIEW",
+      deadline: new Date(Date.now() + 10 * 24 * 3600 * 1000),
+      normalizedDeadline: "In 10 days at 11:59 PM (IST)",
+      priority: "MEDIUM",
+      status: "PENDING",
+      submissionPlatform: "VTOP",
+      weightage: 20,
+      estimatedHours: 8,
+      progressPct: 25,
+      progressNote: "Topic proposal submitted; drafting survey",
+    },
+
+    // CSE3002: Dr. S. Kulkarni
+    {
+      id: "task-saad-ml-term",
+      userId: "student-academic-demo-01",
+      courseId: mlCourseId,
+      title: "Machine Learning Term Paper on Transformers",
+      category: "REPORT",
+      deadline: new Date(Date.now() + 36 * 3600 * 1000),
+      normalizedDeadline: "Tomorrow at 11:59 PM (IST)",
+      priority: "HIGH",
+      status: "IN_PROGRESS",
+      submissionPlatform: "Canvas",
+      weightage: 15,
+      estimatedHours: 5,
+      progressPct: 85,
+      progressNote: "Draft uploaded; awaiting faculty feedback",
+    },
+    {
+      id: "task-arjun-ml-term",
+      userId: "student-academic-demo-03",
+      courseId: mlCourseId,
+      title: "Machine Learning Term Paper on Transformers",
+      category: "REPORT",
+      deadline: new Date(Date.now() + 36 * 3600 * 1000),
+      normalizedDeadline: "Tomorrow at 11:59 PM (IST)",
+      priority: "HIGH",
+      status: "PENDING",
+      submissionPlatform: "Canvas",
+      weightage: 15,
+      estimatedHours: 5,
+      progressPct: 15,
+      progressNote: null,
+    },
+    {
+      id: "task-priya-ml-svm",
+      userId: "student-academic-demo-02",
+      courseId: mlCourseId,
+      title: "[CSE3002] ML Exercise 3: Support Vector Machines",
+      category: "ASSIGNMENT",
+      deadline: new Date(Date.now() + 5 * 24 * 3600 * 1000),
+      normalizedDeadline: "In 5 days at 11:59 PM (IST)",
+      priority: "MEDIUM",
+      status: "PENDING",
+      submissionPlatform: "VTOP",
+      weightage: 10,
+      estimatedHours: 3,
+      progressPct: 0,
+      progressNote: null,
+    },
+    {
+      id: "task-arjun-ml-svm",
+      userId: "student-academic-demo-03",
+      courseId: mlCourseId,
+      title: "[CSE3002] ML Exercise 3: Support Vector Machines",
+      category: "ASSIGNMENT",
+      deadline: new Date(Date.now() - 36 * 3600 * 1000),
+      normalizedDeadline: "Yesterday at 12:00 PM (IST)",
+      priority: "CRITICAL",
+      status: "OVERDUE",
+      submissionPlatform: "VTOP",
+      weightage: 10,
+      estimatedHours: 3,
+      progressPct: 0,
+      progressNote: "Deadline passed; unsubmitted kernel lab",
+    },
+
+    // CSE2004: Dr. K. Swaminathan
+    {
+      id: "task-arjun-os-sync",
+      userId: "student-academic-demo-03",
+      courseId: osCourseId,
+      title: "Operating Systems Thread Synchronization Lab",
+      category: "ASSIGNMENT",
+      deadline: new Date(Date.now() + 7 * 24 * 3600 * 1000),
+      normalizedDeadline: "In 7 days at 11:59 PM (IST)",
+      priority: "MEDIUM",
+      status: "IN_PROGRESS",
+      submissionPlatform: "Canvas",
+      weightage: 10,
+      estimatedHours: 3,
+      progressPct: 70,
+      progressNote: "Semaphore implementation uploaded; needs TA/faculty review",
+    },
+  ];
+
+  for (const item of cohortDeliverables) {
+    if (!item.courseId) continue;
+    await prisma.task.upsert({
+      where: { id: item.id },
+      update: {
+        status: item.status,
+        deadline: item.deadline,
+        normalizedDeadline: item.normalizedDeadline,
+        priority: item.priority,
+      },
+      create: {
+        id: item.id,
+        userId: item.userId,
+        courseId: item.courseId,
+        title: item.title,
+        category: item.category,
+        deadline: item.deadline,
+        normalizedDeadline: item.normalizedDeadline,
+        priority: item.priority,
+        status: item.status,
+        submissionPlatform: item.submissionPlatform,
+        weightage: item.weightage,
+        estimatedHours: item.estimatedHours,
+      },
+    });
+
+    if (item.progressPct > 0 || item.progressNote) {
+      const existingProgress = await prisma.taskProgress.findFirst({
+        where: { taskId: item.id },
+      });
+      if (existingProgress) {
+        await prisma.taskProgress.update({
+          where: { id: existingProgress.id },
+          data: {
+            percentage: item.progressPct,
+            note: item.progressNote,
+          },
+        });
+      } else {
+        await prisma.taskProgress.create({
+          data: {
+            taskId: item.id,
+            percentage: item.progressPct,
+            note: item.progressNote,
+          },
+        });
+      }
+    }
   }
 
   // 5. Seed genuine persistent syllabi in DB if table is empty

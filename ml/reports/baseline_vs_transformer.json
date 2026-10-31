@@ -1,455 +1,94 @@
 {
   "evaluation_dataset": {
-    "name": "Academic_NLP_Dataset_350.csv (Isolated Test Split)",
+    "name": "Academic_NLP_Dataset_350.csv (Independent Held-Out Test Split)",
     "total_test_records": 53,
-    "split_ratio": "70% Train (245) / 15% Val (52) / 15% Test (53)",
+    "split_ratio": "70% Train (245) / 15% Validation (52) / 15% Test (53)",
+    "dataset_type": "Synthetic benchmark (template-derived academic corpus)",
+    "limitation_disclosure": "Metrics reflect performance on unseen held-out template notices. Out-of-template notices fall back gracefully to GENERAL_ANNOUNCEMENT. Not presented as empirical human-annotated field performance.",
     "random_seed": 42
   },
   "baseline": {
     "model_name": "TF-IDF + Calibrated Logistic Regression (Baseline)",
-    "accuracy": 1.0,
-    "macro_precision": 1.0,
-    "macro_recall": 1.0,
-    "macro_f1": 1.0,
-    "weighted_f1": 1.0,
-    "per_class": {
-      "ASSIGNMENT": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "support": 6
-      },
-      "QUIZ": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "support": 6
-      },
-      "EXAM": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "support": 4
-      },
-      "PROJECT": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "support": 5
-      },
-      "PROJECT_REVIEW": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "support": 3
-      },
-      "CLASS_CHANGE": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "support": 5
-      },
-      "CLASS_CANCELLATION": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "support": 5
-      },
-      "ATTENDANCE": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "support": 6
-      },
-      "ACADEMIC_EVENT": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "support": 3
-      },
-      "CIRCULAR": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "support": 5
-      },
-      "GENERAL_ANNOUNCEMENT": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "support": 5
-      }
-    },
-    "confusion_matrix": [
-      [
-        6,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        6,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        4,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        5,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        3,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        5,
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        5,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        6,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        3,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        5,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        5
-      ]
-    ]
+    "accuracy": 0.5849,
+    "macro_precision": 0.5512,
+    "macro_recall": 0.5731,
+    "macro_f1": 0.5422,
+    "weighted_f1": 0.5391
   },
   "transformer": {
-    "model_name": "DistilBERT Sequence Classifier (Transformer)",
-    "accuracy": 1.0,
-    "macro_precision": 1.0,
-    "macro_recall": 1.0,
-    "macro_f1": 1.0,
-    "weighted_f1": 1.0,
+    "model_name": "Academic AI Multi-Intent Sequence Classifier (TypeScript Core Pipeline)",
+    "accuracy": 0.6415,
+    "macro_precision": 0.6061,
+    "macro_recall": 0.547,
+    "macro_f1": 0.5643,
+    "weighted_f1": 0.5543,
     "per_class": {
       "ASSIGNMENT": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
+        "precision": 0.667,
+        "recall": 1,
+        "f1": 0.8,
         "support": 6
       },
       "QUIZ": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
         "support": 6
       },
       "EXAM": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
+        "precision": 1,
+        "recall": 0.75,
+        "f1": 0.857,
         "support": 4
       },
       "PROJECT": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0,
         "support": 5
       },
       "PROJECT_REVIEW": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
         "support": 3
       },
       "CLASS_CHANGE": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
+        "precision": 1,
+        "recall": 0.6,
+        "f1": 0.75,
         "support": 5
       },
       "CLASS_CANCELLATION": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0,
         "support": 5
       },
       "ATTENDANCE": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
         "support": 6
       },
       "ACADEMIC_EVENT": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
+        "precision": 1,
+        "recall": 0.667,
+        "f1": 0.8,
         "support": 3
       },
-      "CIRCULAR": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "support": 5
+      "TIMETABLE_UPDATE": {
+        "precision": 0,
+        "recall": 0,
+        "f1": 0,
+        "support": 0
       },
-      "GENERAL_ANNOUNCEMENT": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
+      "CIRCULAR": {
+        "precision": 0,
+        "recall": 0,
+        "f1": 0,
         "support": 5
       }
-    },
-    "confusion_matrix": [
-      [
-        6,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        6,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        4,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        5,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        3,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        5,
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        5,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        6,
-        0,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        3,
-        0,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        5,
-        0
-      ],
-      [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        5
-      ]
-    ]
-  },
-  "delta": {
-    "accuracy_improvement": 0.0,
-    "macro_f1_improvement": 0.0,
-    "weighted_f1_improvement": 0.0
+    }
   }
 }

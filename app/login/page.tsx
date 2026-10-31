@@ -15,7 +15,7 @@ import {
   ArrowLeft,
   Lock,
 } from "lucide-react";
-import { DEMO_STUDENTS, DEMO_TEACHERS } from "@/lib/auth/session";
+import { DEMO_STUDENTS, DEMO_TEACHERS, setActiveSessionId } from "@/lib/auth/session";
 
 function LoginForm() {
   const router = useRouter();
@@ -65,20 +65,17 @@ function LoginForm() {
       });
 
       const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || "Authentication failed");
-      }
+      // Update active session in memory and cookie
+      setActiveSessionId(data.user.id);
 
-      // Redirect to appropriate role dashboard
+      // Full navigation to ensure fresh session cookies and state
       if (activeRole === "TEACHER") {
-        router.push("/faculty-course-intelligence");
+        window.location.href = "/faculty-course-intelligence";
       } else {
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
       }
-      router.refresh();
     } catch (err: any) {
       setError(err.message || "Sign in failed");
-    } finally {
       setLoading(false);
     }
   };
@@ -97,9 +94,9 @@ function LoginForm() {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        padding: "2rem 1.5rem",
-        background: "radial-gradient(ellipse at top, #0f172a 0%, #020617 100%)",
-        color: "#f8fafc",
+        padding: "2.5rem 1.5rem",
+        background: "var(--bg-app)",
+        color: "var(--text-primary)",
       }}
     >
       {/* Back to landing page */}
@@ -109,14 +106,15 @@ function LoginForm() {
           style={{
             display: "inline-flex",
             alignItems: "center",
-            gap: "0.4rem",
-            fontSize: "0.8rem",
-            color: "#94a3b8",
+            gap: "0.45rem",
+            fontSize: "0.82rem",
+            fontWeight: 600,
+            color: "#526176",
             textDecoration: "none",
             transition: "color 0.15s ease",
           }}
         >
-          <ArrowLeft size={14} />
+          <ArrowLeft size={15} />
           <span>Back to Role Selection</span>
         </Link>
       </div>
@@ -128,16 +126,17 @@ function LoginForm() {
             display: "inline-flex",
             alignItems: "center",
             gap: "0.45rem",
-            padding: "0.3rem 0.8rem",
-            background: "rgba(59, 130, 246, 0.12)",
-            border: "1px solid rgba(59, 130, 246, 0.28)",
+            padding: "0.35rem 0.85rem",
+            background: "#FFFFFF",
+            border: "1px solid #E1E5EC",
             borderRadius: "999px",
-            color: "#60a5fa",
-            fontSize: "0.72rem",
+            color: "#3448A5",
+            fontSize: "0.74rem",
             fontWeight: 700,
             letterSpacing: "0.06em",
             textTransform: "uppercase",
             marginBottom: "0.75rem",
+            boxShadow: "0 2px 6px rgba(11, 18, 32, 0.04)",
           }}
         >
           <Sparkles size={13} />
@@ -145,10 +144,10 @@ function LoginForm() {
         </div>
         <h1
           style={{
-            fontSize: "1.85rem",
+            fontSize: "1.9rem",
             fontWeight: 800,
             fontFamily: "var(--font-display)",
-            color: "#ffffff",
+            color: "#172033",
             margin: 0,
             letterSpacing: "-0.02em",
           }}
@@ -157,10 +156,11 @@ function LoginForm() {
         </h1>
         <p
           style={{
-            fontSize: "0.85rem",
-            color: "#94a3b8",
-            margin: "0.35rem 0 0 0",
+            fontSize: "0.88rem",
+            color: "#526176",
+            margin: "0.45rem 0 0 0",
             maxWidth: "420px",
+            lineHeight: 1.5,
           }}
         >
           Sign in with your verified institutional credentials to access your isolated workspace.
@@ -174,7 +174,7 @@ function LoginForm() {
           maxWidth: "460px",
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
-          gap: "0.5rem",
+          gap: "0.6rem",
           marginBottom: "1rem",
         }}
       >
@@ -185,15 +185,16 @@ function LoginForm() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: "0.5rem",
-            padding: "0.7rem",
+            gap: "0.55rem",
+            padding: "0.75rem",
             borderRadius: "10px",
-            border: activeRole === "STUDENT" ? "2px solid #3b82f6" : "1px solid rgba(255, 255, 255, 0.1)",
-            background: activeRole === "STUDENT" ? "rgba(37, 99, 235, 0.2)" : "rgba(15, 23, 42, 0.6)",
-            color: activeRole === "STUDENT" ? "#60a5fa" : "#94a3b8",
+            border: activeRole === "STUDENT" ? "2px solid #3448A5" : "1px solid #E1E5EC",
+            background: "#FFFFFF",
+            color: activeRole === "STUDENT" ? "#3448A5" : "#526176",
             fontWeight: 700,
-            fontSize: "0.84rem",
+            fontSize: "0.86rem",
             cursor: "pointer",
+            boxShadow: activeRole === "STUDENT" ? "0 4px 12px rgba(52, 72, 165, 0.12)" : "0 1px 3px rgba(11, 18, 32, 0.04)",
             transition: "all 0.15s ease",
           }}
         >
@@ -208,15 +209,16 @@ function LoginForm() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: "0.5rem",
-            padding: "0.7rem",
+            gap: "0.55rem",
+            padding: "0.75rem",
             borderRadius: "10px",
-            border: activeRole === "TEACHER" ? "2px solid #8b5cf6" : "1px solid rgba(255, 255, 255, 0.1)",
-            background: activeRole === "TEACHER" ? "rgba(139, 92, 246, 0.2)" : "rgba(15, 23, 42, 0.6)",
-            color: activeRole === "TEACHER" ? "#c084fc" : "#94a3b8",
+            border: activeRole === "TEACHER" ? "2px solid #3448A5" : "1px solid #E1E5EC",
+            background: "#FFFFFF",
+            color: activeRole === "TEACHER" ? "#3448A5" : "#526176",
             fontWeight: 700,
-            fontSize: "0.84rem",
+            fontSize: "0.86rem",
             cursor: "pointer",
+            boxShadow: activeRole === "TEACHER" ? "0 4px 12px rgba(52, 72, 165, 0.12)" : "0 1px 3px rgba(11, 18, 32, 0.04)",
             transition: "all 0.15s ease",
           }}
         >
@@ -230,38 +232,37 @@ function LoginForm() {
         style={{
           width: "100%",
           maxWidth: "460px",
-          background: "rgba(15, 23, 42, 0.8)",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
+          background: "#FFFFFF",
+          border: "1px solid #E1E5EC",
           borderRadius: "14px",
-          boxShadow: "0 10px 40px rgba(0, 0, 0, 0.4)",
+          boxShadow: "0 8px 30px rgba(11, 18, 32, 0.06)",
           padding: "2rem",
           marginBottom: "1.5rem",
-          backdropFilter: "blur(12px)",
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
           <h2
             style={{
-              fontSize: "1.15rem",
+              fontSize: "1.2rem",
               fontWeight: 700,
               fontFamily: "var(--font-display)",
               margin: 0,
-              color: "#ffffff",
+              color: "#172033",
             }}
           >
             {activeRole === "TEACHER" ? "Faculty Authentication" : "Student Authentication"}
           </h2>
           <span
             style={{
-              fontSize: "0.68rem",
+              fontSize: "0.72rem",
               fontWeight: 700,
               textTransform: "uppercase",
-              padding: "0.2rem 0.55rem",
+              padding: "0.25rem 0.6rem",
               borderRadius: "999px",
-              background: activeRole === "TEACHER" ? "rgba(139, 92, 246, 0.15)" : "rgba(37, 99, 235, 0.15)",
-              color: activeRole === "TEACHER" ? "#c084fc" : "#60a5fa",
+              background: activeRole === "TEACHER" ? "rgba(184, 138, 69, 0.1)" : "rgba(52, 72, 165, 0.08)",
+              color: activeRole === "TEACHER" ? "#B88A45" : "#3448A5",
               letterSpacing: "0.06em",
-              border: `1px solid ${activeRole === "TEACHER" ? "rgba(139, 92, 246, 0.3)" : "rgba(37, 99, 235, 0.3)"}`,
+              border: `1px solid ${activeRole === "TEACHER" ? "rgba(184, 138, 69, 0.25)" : "rgba(52, 72, 165, 0.2)"}`,
             }}
           >
             Role: {activeRole}
@@ -271,31 +272,32 @@ function LoginForm() {
         {error && (
           <div
             style={{
-              background: "rgba(220, 38, 38, 0.12)",
-              border: "1px solid rgba(220, 38, 38, 0.35)",
-              color: "#f87171",
+              background: "rgba(196, 81, 53, 0.08)",
+              border: "1px solid rgba(196, 81, 53, 0.25)",
+              color: "#C45135",
               borderRadius: "8px",
               padding: "0.75rem 0.9rem",
-              fontSize: "0.8rem",
+              fontSize: "0.82rem",
               marginBottom: "1.2rem",
               lineHeight: 1.45,
+              fontWeight: 500,
             }}
           >
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSignIn} style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
+        <form onSubmit={handleSignIn} style={{ display: "flex", flexDirection: "column", gap: "1.15rem" }}>
           <div>
             <label
               style={{
                 display: "block",
-                fontSize: "0.72rem",
+                fontSize: "0.74rem",
                 fontWeight: 700,
                 textTransform: "uppercase",
                 letterSpacing: "0.06em",
-                color: "#94a3b8",
-                marginBottom: "0.4rem",
+                color: "#172033",
+                marginBottom: "0.45rem",
               }}
             >
               {activeRole === "TEACHER"
@@ -315,43 +317,43 @@ function LoginForm() {
                 required
                 style={{
                   width: "100%",
-                  padding: "0.75rem 0.95rem 0.75rem 2.3rem",
+                  padding: "0.75rem 0.95rem 0.75rem 2.4rem",
                   borderRadius: "8px",
-                  border: "1px solid rgba(255, 255, 255, 0.12)",
-                  background: "#090d16",
-                  fontSize: "0.86rem",
-                  color: "#f8fafc",
+                  border: "1px solid #E1E5EC",
+                  background: "#F7F5F0",
+                  fontSize: "0.88rem",
+                  color: "#172033",
                   boxSizing: "border-box",
                   outline: "none",
                 }}
               />
               <User
-                size={15}
+                size={16}
                 style={{
                   position: "absolute",
                   left: "0.85rem",
                   top: "50%",
                   transform: "translateY(-50%)",
-                  color: "#64748b",
+                  color: "#526176",
                 }}
               />
             </div>
           </div>
 
           <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.45rem" }}>
               <label
                 style={{
-                  fontSize: "0.72rem",
+                  fontSize: "0.74rem",
                   fontWeight: 700,
                   textTransform: "uppercase",
                   letterSpacing: "0.06em",
-                  color: "#94a3b8",
+                  color: "#172033",
                 }}
               >
                 Password
               </label>
-              <span style={{ fontSize: "0.68rem", color: "#64748b" }}>
+              <span style={{ fontSize: "0.72rem", color: "#526176", fontWeight: 500 }}>
                 Hashed verification
               </span>
             </div>
@@ -364,24 +366,24 @@ function LoginForm() {
                 required
                 style={{
                   width: "100%",
-                  padding: "0.75rem 0.95rem 0.75rem 2.3rem",
+                  padding: "0.75rem 0.95rem 0.75rem 2.4rem",
                   borderRadius: "8px",
-                  border: "1px solid rgba(255, 255, 255, 0.12)",
-                  background: "#090d16",
-                  fontSize: "0.86rem",
-                  color: "#f8fafc",
+                  border: "1px solid #E1E5EC",
+                  background: "#F7F5F0",
+                  fontSize: "0.88rem",
+                  color: "#172033",
                   boxSizing: "border-box",
                   outline: "none",
                 }}
               />
               <Key
-                size={15}
+                size={16}
                 style={{
                   position: "absolute",
                   left: "0.85rem",
                   top: "50%",
                   transform: "translateY(-50%)",
-                  color: "#64748b",
+                  color: "#526176",
                 }}
               />
             </div>
@@ -395,8 +397,8 @@ function LoginForm() {
               padding: "0.85rem",
               borderRadius: "8px",
               border: "none",
-              background: activeRole === "TEACHER" ? "#7c3aed" : "#2563eb",
-              color: "#ffffff",
+              background: "#3448A5",
+              color: "#FFFFFF",
               fontSize: "0.88rem",
               fontWeight: 700,
               cursor: "pointer",
@@ -404,7 +406,8 @@ function LoginForm() {
               alignItems: "center",
               justifyContent: "center",
               gap: "0.5rem",
-              boxShadow: activeRole === "TEACHER" ? "0 4px 15px rgba(124, 58, 237, 0.4)" : "0 4px 15px rgba(37, 99, 235, 0.4)",
+              boxShadow: "0 4px 14px rgba(52, 72, 165, 0.25)",
+              transition: "background 0.15s ease",
             }}
           >
             {loading ? "Verifying Credentials..." : `Sign In as ${activeRole === "TEACHER" ? "Teacher" : "Student"}`}
@@ -418,34 +421,35 @@ function LoginForm() {
         style={{
           width: "100%",
           maxWidth: "460px",
-          background: "rgba(15, 23, 42, 0.6)",
-          border: "1px solid rgba(255, 255, 255, 0.08)",
+          background: "#FFFFFF",
+          border: "1px solid #E1E5EC",
           borderRadius: "12px",
           padding: "1.25rem",
+          boxShadow: "0 4px 16px rgba(11, 18, 32, 0.04)",
         }}
       >
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "0.4rem",
-            fontSize: "0.72rem",
+            gap: "0.45rem",
+            fontSize: "0.74rem",
             fontWeight: 700,
             textTransform: "uppercase",
-            letterSpacing: "0.08em",
-            color: activeRole === "TEACHER" ? "#c084fc" : "#60a5fa",
+            letterSpacing: "0.06em",
+            color: "#3448A5",
             marginBottom: "0.5rem",
           }}
         >
-          <ShieldCheck size={14} />
+          <ShieldCheck size={15} />
           <span>Curated {activeRole === "TEACHER" ? "Teacher" : "Student"} Accounts (Evaluation)</span>
         </div>
 
-        <p style={{ fontSize: "0.74rem", color: "#94a3b8", margin: "0 0 0.75rem 0" }}>
+        <p style={{ fontSize: "0.78rem", color: "#526176", margin: "0 0 0.85rem 0", lineHeight: 1.45 }}>
           Click any verified account below to populate credentials and test role-isolated data:
         </p>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           {(activeRole === "TEACHER" ? DEMO_TEACHERS : DEMO_STUDENTS).map((acc) => {
             const isSelected = identifier.toLowerCase() === acc.email.toLowerCase();
             return (
@@ -457,37 +461,36 @@ function LoginForm() {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  padding: "0.6rem 0.85rem",
+                  padding: "0.65rem 0.85rem",
                   borderRadius: "8px",
                   border: isSelected
-                    ? `1.5px solid ${activeRole === "TEACHER" ? "#8b5cf6" : "#3b82f6"}`
-                    : "1px solid rgba(255, 255, 255, 0.08)",
+                    ? "1.5px solid #3448A5"
+                    : "1px solid #E1E5EC",
                   background: isSelected
-                    ? activeRole === "TEACHER"
-                      ? "rgba(139, 92, 246, 0.1)"
-                      : "rgba(37, 99, 235, 0.1)"
-                    : "rgba(0, 0, 0, 0.2)",
+                    ? "rgba(52, 72, 165, 0.06)"
+                    : "#F7F5F0",
                   cursor: "pointer",
                   textAlign: "left",
                   transition: "all 0.15s ease",
                 }}
               >
                 <div>
-                  <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "#f8fafc" }}>
+                  <div style={{ fontSize: "0.84rem", fontWeight: 700, color: "#172033" }}>
                     {acc.name}
                   </div>
-                  <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>
+                  <div style={{ fontSize: "0.72rem", color: "#526176" }}>
                     {acc.rollNumber} &bull; {acc.program}
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                   <span
                     style={{
-                      fontSize: "0.62rem",
-                      padding: "0.15rem 0.4rem",
+                      fontSize: "0.68rem",
+                      padding: "0.15rem 0.45rem",
                       borderRadius: "4px",
-                      background: "rgba(255, 255, 255, 0.08)",
-                      color: "#e2e8f0",
+                      background: "#FFFFFF",
+                      border: "1px solid #E1E5EC",
+                      color: "#526176",
                       fontWeight: 600,
                     }}
                   >
@@ -495,8 +498,8 @@ function LoginForm() {
                   </span>
                   {isSelected && (
                     <CheckCircle2
-                      size={14}
-                      color={activeRole === "TEACHER" ? "#c084fc" : "#60a5fa"}
+                      size={15}
+                      color="#3448A5"
                     />
                   )}
                 </div>

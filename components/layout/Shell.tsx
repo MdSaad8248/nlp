@@ -8,9 +8,10 @@ import MobileBottomNav from "./MobileBottomNav";
 
 interface ShellProps {
   children: React.ReactNode;
+  userRole?: "STUDENT" | "TEACHER";
 }
 
-export default function Shell({ children }: ShellProps) {
+export default function Shell({ children, userRole }: ShellProps) {
   const pathname = usePathname();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -57,6 +58,7 @@ export default function Shell({ children }: ShellProps) {
         onClose={() => setMobileDrawerOpen(false)}
         isCollapsed={isCollapsed}
         onToggleCollapse={handleToggleCollapse}
+        userRole={userRole}
       />
 
       {/* Main Application Container */}
@@ -76,6 +78,7 @@ export default function Shell({ children }: ShellProps) {
         <Header
           onMenuToggle={() => setMobileDrawerOpen(true)}
           isCollapsed={isCollapsed}
+          userRole={userRole}
         />
 
         {/* Content Viewport */}

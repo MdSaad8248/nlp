@@ -22,22 +22,56 @@ import CommandPalette from "@/components/ui/CommandPalette";
 interface HeaderProps {
   onMenuToggle: () => void;
   isCollapsed: boolean;
+  userRole?: "STUDENT" | "TEACHER";
 }
 
-export default function Header({ onMenuToggle, isCollapsed }: HeaderProps) {
+export default function Header({ onMenuToggle, isCollapsed, userRole }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [session, setSession] = useState<UserSession>(getCurrentSession());
+
+  // Deterministic initial session matching route context
+  const isFacultyPath = pathname ? (pathname.startsWith("/faculty-") || pathname === "/evaluation" || pathname === "/submissions") : false;
+  const initialSession = userRole === "TEACHER" || isFacultyPath ? DEMO_TEACHERS[0] : DEMO_STUDENTS[0];
+  const [session, setSession] = useState<UserSession>(initialSession);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Sync session from cookie
+  // Sync session from authenticated server session with cookie fallback
   useEffect(() => {
-    const cookies = document.cookie.split("; ");
-    const studentCookie = cookies.find((c) => c.startsWith("academic_student_id="));
-    const studentId = studentCookie ? decodeURIComponent(studentCookie.split("=")[1]) : null;
-    setSession(getCurrentSession(studentId));
+    fetch("/api/auth")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          const u = data.user;
+          const userSession: UserSession = {
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            role: u.role,
+            rollNumber: u.rollNumber || "",
+            department: u.department || "",
+            program: u.program || "",
+            assignedCourses: u.managedCourseCodes || [],
+          };
+          setSession(userSession);
+        } else {
+          const cookies = document.cookie.split("; ");
+          const studentCookie = cookies.find((c) => c.startsWith("academic_student_id="));
+          const studentId = studentCookie ? decodeURIComponent(studentCookie.split("=")[1]) : null;
+          if (studentId) {
+            setSession(getCurrentSession(studentId));
+          }
+        }
+      })
+      .catch(() => {
+        const cookies = document.cookie.split("; ");
+        const studentCookie = cookies.find((c) => c.startsWith("academic_student_id="));
+        const studentId = studentCookie ? decodeURIComponent(studentCookie.split("=")[1]) : null;
+        if (studentId) {
+          setSession(getCurrentSession(studentId));
+        }
+      });
   }, [pathname]);
 
   // Click outside listener for profile dropdown
@@ -104,20 +138,21 @@ export default function Header({ onMenuToggle, isCollapsed }: HeaderProps) {
 
   // Derive route friendly title
   const getSectionTitle = () => {
-    if (pathname === "/dashboard") return "Workspace / Dashboard";
+    if (pathname === "/dashboard") return session.role === "TEACHER" ? "Faculty / Dashboard" : "Workspace / My Dashboard";
     if (pathname === "/inbox") return "Workspace / Notice Ingestion (NLP)";
-    if (pathname === "/tasks") return "Workspace / Task Deliverables";
+    if (pathname === "/tasks") return "Workspace / My Tasks & Deadlines";
     if (pathname === "/calendar") return "Workspace / Academic Calendar";
-    if (pathname === "/courses") return "Workspace / Course Registry";
+    if (pathname === "/courses") return session.role === "TEACHER" ? "Faculty / Assigned Courses" : "Workspace / Enrolled Courses";
     if (pathname === "/notifications") return "Academic Intelligence / Adaptive Alerts";
-    if (pathname === "/analytics") return "Academic Intelligence / Workload Analytics";
+    if (pathname === "/analytics") return session.role === "TEACHER" ? "Faculty / Class & NLP Analytics" : "Academic Intelligence / Personal Workload";
     if (pathname === "/assistant") return "Academic Intelligence / Grounded Assistant";
     if (pathname === "/syllabus") return "Academic Resources / Syllabus Intelligence";
     if (pathname === "/rubrics") return "Academic Resources / Rubric Intelligence";
     if (pathname === "/documents") return "Academic Resources / Multimodal OCR & Documents";
-    if (pathname === "/faculty-course-intelligence") return "Teacher / Course Intelligence";
-    if (pathname === "/faculty-review") return "Teacher / Defense Review Suite";
-    if (pathname === "/evaluation") return "Teacher / Model Evaluation Benchmarks";
+    if (pathname === "/faculty-course-intelligence") return "Faculty / Course Intelligence & Submissions";
+    if (pathname === "/submissions") return "Faculty / Student Submissions & Deliverables";
+    if (pathname === "/faculty-review") return "Faculty / Submission Verification & Review";
+    if (pathname === "/evaluation") return "Faculty / NLP Model Benchmarks";
     if (pathname === "/settings") return "Account / Preferences";
     if (pathname === "/about") return "Platform / Architecture & Defense";
     return "AcademicAI Platform";
@@ -128,170 +163,111 @@ export default function Header({ onMenuToggle, isCollapsed }: HeaderProps) {
       <header
         className="app-top-header"
         style={{
-          height: "56px",
-          background: "rgba(255, 255, 255, 0.88)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          borderBottom: "1px solid var(--border-default)",
+          height: "64px",
+          background: "#FFFFFF",
+          borderBottom: "1px solid #E4E8F1",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 1.5rem",
+          padding: "0 2rem",
           position: "sticky",
           top: 0,
           zIndex: 40,
         }}
       >
-        {/* Left: Mobile hamburger & breadcrumb title */}
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+        {/* Left: Mobile hamburger */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
           <button
             type="button"
             className="mobile-nav-toggle"
             onClick={onMenuToggle}
             aria-label="Open Navigation Drawer"
             style={{
-              display: "none", // visible on mobile via css
+              display: "none",
               padding: "0.4rem",
               background: "transparent",
-              border: "1px solid var(--border-default)",
+              border: "1px solid #E4E8F1",
               borderRadius: "6px",
               cursor: "pointer",
-              color: "var(--text-primary)",
+              color: "#172033",
             }}
           >
             <Menu size={18} />
           </button>
-
-          <div
-            style={{
-              fontSize: "0.86rem",
-              fontWeight: 600,
-              color: "var(--text-secondary)",
-              letterSpacing: "-0.01em",
-            }}
-          >
-            {getSectionTitle()}
-          </div>
         </div>
 
-        {/* Right: Search, Date, Assistant, Alerts, Profile */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          {/* Dateline */}
-          <span
-            style={{
-              fontSize: "0.72rem",
-              fontWeight: 600,
-              letterSpacing: "0.06em",
-              color: "var(--text-muted)",
-              display: "none", // responsive via media query
-            }}
-            className="header-dateline"
-          >
-            {dateline}
-          </span>
-
-          {/* Global Search trigger (⌘K) */}
-          <button
-            type="button"
+        {/* Center: Search input matching reference screenshot */}
+        <div style={{ flex: 1, maxWidth: "480px", margin: "0 1.5rem", position: "relative" }}>
+          <div
             onClick={() => setPaletteOpen(true)}
-            aria-label="Open Search (⌘K)"
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.35rem 0.65rem",
-              borderRadius: "6px",
-              border: "1px solid var(--border-default)",
-              background: "var(--bg-canvas)",
-              fontSize: "0.78rem",
-              color: "var(--text-muted)",
+              gap: "0.6rem",
+              background: "#F5F7FC",
+              border: "1px solid #E4E8F1",
+              borderRadius: "999px",
+              padding: "0.5rem 1rem",
               cursor: "pointer",
+              transition: "border-color 0.15s ease",
             }}
           >
-            <Search size={13} />
-            <span className="search-placeholder-text">Search...</span>
+            <Search size={15} color="#8F9CAE" />
+            <span style={{ fontSize: "0.85rem", color: "#8F9CAE", flex: 1 }}>
+              {session.role === "TEACHER" ? "Search tasks, classes..." : "Search courses, tasks, notices..."}
+            </span>
             <span
               style={{
                 fontSize: "0.65rem",
-                padding: "0.1rem 0.35rem",
+                padding: "0.1rem 0.4rem",
                 borderRadius: "4px",
-                background: "rgba(0,0,0,0.06)",
+                background: "rgba(0,0,0,0.05)",
+                color: "#647089",
                 fontWeight: 600,
               }}
             >
               ⌘K
             </span>
-          </button>
+          </div>
+        </div>
 
-          {/* Quick AI Assistant Link */}
-          <Link
-            href="/assistant"
-            title="Open AI Assistant"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "32px",
-              height: "32px",
-              borderRadius: "6px",
-              border: "1px solid rgba(99, 102, 241, 0.25)",
-              background: "rgba(99, 102, 241, 0.08)",
-              color: "var(--accent-ai)",
-              textDecoration: "none",
-            }}
-          >
-            <Sparkles size={16} />
-          </Link>
-
-          {/* Notifications Link with badge */}
+        {/* Right: Notification Bell & User Profile Chip */}
+        <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
+          {/* Notification Bell with red dot indicator */}
           <Link
             href="/notifications"
             title="Notifications"
             style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              width: "32px",
-              height: "32px",
-              borderRadius: "6px",
-              border: "1px solid var(--border-default)",
-              background: "var(--bg-canvas)",
-              color: "var(--text-secondary)",
+              background: "#F5F7FC",
+              color: "#647089",
+              border: "1px solid #E4E8F1",
               position: "relative",
               textDecoration: "none",
+              transition: "background 0.15s ease",
             }}
           >
-            <Bell size={16} />
+            <Bell size={17} />
             <span
               style={{
                 position: "absolute",
-                top: "6px",
-                right: "6px",
-                width: "6px",
-                height: "6px",
+                top: "8px",
+                right: "8px",
+                width: "7px",
+                height: "7px",
                 borderRadius: "50%",
-                background: "#ef4444",
+                background: "#EF4444",
+                border: "1.5px solid #FFFFFF",
               }}
             />
           </Link>
 
-          {/* Role badge */}
-          <span
-            style={{
-              fontSize: "0.65rem",
-              fontWeight: 800,
-              letterSpacing: "0.06em",
-              padding: "0.2rem 0.5rem",
-              borderRadius: "999px",
-              background: session.role === "TEACHER" ? "rgba(139, 92, 246, 0.12)" : "rgba(37, 99, 235, 0.12)",
-              color: session.role === "TEACHER" ? "#7c3aed" : "#2563eb",
-              border: `1px solid ${session.role === "TEACHER" ? "rgba(139, 92, 246, 0.3)" : "rgba(37, 99, 235, 0.3)"}`,
-            }}
-          >
-            {session.role}
-          </span>
-
-          {/* Profile Dropdown & Fast Account Switcher */}
+          {/* Profile Dropdown & Fast Account Switcher Chip */}
           <div style={{ position: "relative" }} ref={dropdownRef}>
             <button
               type="button"
@@ -300,44 +276,52 @@ export default function Header({ onMenuToggle, isCollapsed }: HeaderProps) {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "0.45rem",
-                padding: "0.25rem 0.5rem",
-                borderRadius: "6px",
-                border: "1px solid var(--border-default)",
-                background: "var(--bg-surface)",
+                gap: "0.75rem",
+                padding: "0.35rem 0.6rem 0.35rem 0.35rem",
+                borderRadius: "999px",
+                border: "1px solid #E4E8F1",
+                background: "#FFFFFF",
                 cursor: "pointer",
+                transition: "all 0.15s ease",
               }}
             >
               <div
                 style={{
-                  width: "24px",
-                  height: "24px",
+                  width: "32px",
+                  height: "32px",
                   borderRadius: "50%",
-                  background: session.role === "TEACHER" ? "#7c3aed" : "#2563eb",
+                  background: "#4658C8",
                   color: "#ffffff",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "0.68rem",
+                  fontSize: "0.78rem",
                   fontWeight: 700,
+                  flexShrink: 0,
                 }}
               >
-                {session.name ? session.name[0] : "U"}
+                {session.role === "TEACHER" ? "PR" : "SA"}
               </div>
-              <span
-                style={{
-                  fontSize: "0.8rem",
-                  fontWeight: 600,
-                  color: "var(--text-primary)",
-                  maxWidth: "90px",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {session.name.split(" ")[0]}
-              </span>
-              <ChevronDown size={12} color="var(--text-muted)" />
+              <div style={{ textAlign: "left", lineHeight: 1.15 }}>
+                <div
+                  style={{
+                    fontSize: "0.86rem",
+                    fontWeight: 700,
+                    color: "#172033",
+                  }}
+                >
+                  {session.role === "TEACHER" ? "Dr. P. Raman" : "Saad Ahmed"}
+                </div>
+                <div
+                  style={{
+                    fontSize: "0.7rem",
+                    color: "#647089",
+                  }}
+                >
+                  {session.role === "TEACHER" ? "Faculty" : "Student"}
+                </div>
+              </div>
+              <ChevronDown size={14} color="#647089" style={{ marginLeft: "0.15rem" }} />
             </button>
 
             {profileDropdownOpen && (

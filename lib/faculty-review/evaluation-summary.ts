@@ -13,14 +13,14 @@ export interface EvaluationMetricSummary {
 export const EVALUATION_BENCHMARK_SUMMARY: EvaluationMetricSummary[] = [
   {
     componentId: "A",
-    component: "A. Document & Notice Classification",
-    category: "NLP Statistical",
-    sampleSize: 30,
-    accuracyOrSuccess: "76.7%",
-    correctCount: 23,
-    incorrectCount: 7,
-    keyMetric: "Classification Accuracy: 76.7% | Macro-F1: 71.1%",
-    notes: "Multi-class categorization across 11 notice types; multi-intent notices fall back gracefully",
+    component: "A. Document & Notice Classification (ML Held-Out Test)",
+    category: "ML Sequence Classification",
+    sampleSize: 53,
+    accuracyOrSuccess: "64.2%",
+    correctCount: 34,
+    incorrectCount: 19,
+    keyMetric: "Held-Out Accuracy: 64.2% (34/53) | Macro-F1: 59.9%",
+    notes: "Independent test split (N=53) across 11 classes. High precision on QUIZ, ATTENDANCE, REVIEW; out-of-template fallback to GENERAL_ANNOUNCEMENT (Synthetic Benchmark)",
   },
   {
     componentId: "B",

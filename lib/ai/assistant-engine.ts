@@ -17,9 +17,9 @@ const CONFIRM_PREFIX = "__CONFIRM__:";
 
 export class AssistantEngine {
   private static getGeminiConfig() {
-    const apiKey = process.env.GEMINI_API_KEY || "";
-    const model = process.env.AI_MODEL || "gemini-1.5-flash";
-    const isConfigured = !!apiKey && apiKey.trim().length > 0;
+    const apiKey = (process.env.GEMINI_API_KEY || "").trim();
+    const model = process.env.GEMINI_MODEL || process.env.AI_MODEL || "gemini-3.8-flash";
+    const isConfigured = !!apiKey && apiKey.length > 0;
     return { apiKey, model, isConfigured };
   }
 

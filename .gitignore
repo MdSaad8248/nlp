@@ -4,46 +4,71 @@
 .pnp.js
 .yarn/cache
 
-# Testing
-/coverage
-
-# Next.js
+# Next.js & Build Outputs
 /.next/
 /out/
+/build/
+/dist/
+/.turbo/
 
-# Production
-/build
+# Testing & Coverage
+/coverage
 
-# Misc
-.DS_Store
-*.pem
+# Python & Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
 
-# Debug logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Large Media & Demonstration Videos (200-300MB - exclude from Git)
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.wmv
+*.flv
+/demo-video/*.mp4
+/video/*.mp4
+
+# Compressed Archives & Duplicate Zip Files
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
 
 # Local environment and secret files
 .env*.local
 .env
 .env.production
+*.pem
+*.key
 
 # Database
-prisma/dev.db
 prisma/dev.db-journal
-*.db
 *.db-journal
 
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
 
-# Python & ML
-__pycache__/
-*.py[cod]
-*$py.class
-.pytest_cache/
+# Debug and temporary logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+tmp/
+temp/
+*.tmp
+.DS_Store
+Thumbs.db
 
 # Scratch & temporary artifacts
 scratch/
-

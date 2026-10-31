@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Shell from "@/components/layout/Shell";
+import { useRouter } from "next/navigation";
+import { getClientCookieSession } from "@/lib/auth/session";
 import {
   CheckSquare,
   Clock,
@@ -21,6 +23,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
+import { formatTaskTitle, formatDescription } from "@/lib/utils/formatters";
 
 interface TaskItem {
   id: string;
@@ -54,6 +57,7 @@ interface TaskItem {
 }
 
 export default function TasksPage() {
+  const router = useRouter();
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterTab, setFilterTab] = useState<"all" | "today" | "upcoming" | "completed">("all");
@@ -64,8 +68,13 @@ export default function TasksPage() {
   const [selectedDetailTask, setSelectedDetailTask] = useState<TaskItem | null>(null);
 
   useEffect(() => {
+    const session = getClientCookieSession();
+    if (session.role === "TEACHER") {
+      router.replace("/faculty-course-intelligence");
+      return;
+    }
     fetchTasks();
-  }, []);
+  }, [router]);
 
   const fetchTasks = async () => {
     try {
@@ -116,7 +125,7 @@ export default function TasksPage() {
         <div>
           <div style={{ display: "flex", alignItems: "baseline", gap: "1rem" }}>
             <h1 className="page-title">Academic Flow</h1>
-            <span className="badge badge-academic" style={{ fontSize: "0.6rem" }}>{tasks.length} tracked</span>
+            <span className="badge badge-academic" style={{ fontSize: "0.74rem" }}>{tasks.length} tracked</span>
           </div>
           <p className="page-sub">
             Syllabus deliverables, verified deadlines, and explainable urgency ratings.
@@ -363,7 +372,7 @@ export default function TasksPage() {
                         letterSpacing: "-0.015em",
                       }}
                     >
-                      {task.title}
+                      {formatTaskTitle(task.title, task.course?.code)}
                     </h3>
 
                     {/* Metadata line: Deadline + Workload + Progress */}
@@ -553,7 +562,7 @@ export default function TasksPage() {
                   Deliverable Title
                 </div>
                 <h4 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text-primary)", marginTop: "0.25rem" }}>
-                  {selectedDetailTask.title}
+                  {formatTaskTitle(selectedDetailTask.title, selectedDetailTask.course?.code)}
                 </h4>
               </div>
 
@@ -578,7 +587,9 @@ export default function TasksPage() {
                   Description &amp; Reasoning
                 </span>
                 <p style={{ fontSize: "0.84rem", color: "var(--text-secondary)", marginTop: "0.3rem", lineHeight: 1.5 }}>
-                  {selectedDetailTask.description || "Deliverable tracked through the AcademicAI natural language extraction engine."}
+                  {selectedDetailTask.description
+                    ? formatDescription(selectedDetailTask.description)
+                    : "Deliverable tracked through the AcademicAI natural language extraction engine."}
                 </p>
               </div>
             </div>

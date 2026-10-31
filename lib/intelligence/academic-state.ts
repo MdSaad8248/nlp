@@ -10,6 +10,7 @@ import {
 import { calculateAcademicPriority } from "./priority-engine";
 import { computeWorkloadSummary, WorkloadItemInput } from "./workload-engine";
 import { generateRecommendationReasons, formatFactorBreakdown } from "./priority-explanations";
+import { formatTaskTitle, evaluateDeadlineStatus } from "@/lib/utils/formatters";
 
 export async function getFullAcademicState(
   userId?: string,
@@ -113,10 +114,8 @@ export async function getFullAcademicState(
       now,
     });
 
-    const isOverdue =
-      status !== "COMPLETED" &&
-      status !== "CANCELLED" &&
-      (status === "OVERDUE" || (deadlineMs !== null && deadlineMs < nowMs));
+    const deadlineEval = evaluateDeadlineStatus(t.deadline, t.status, now);
+    const isOverdue = deadlineEval.isOverdue;
 
     if (isOverdue) overdueCount++;
     if (evalResult.level === "HIGH" || evalResult.level === "CRITICAL") {
@@ -126,31 +125,22 @@ export async function getFullAcademicState(
     }
 
     let timeRemainingHours: number | null = null;
-    let timeRemainingLabel = "No deadline";
-
     if (deadlineMs !== null) {
       const diffHours = (deadlineMs - nowMs) / (1000 * 60 * 60);
       timeRemainingHours = Math.round(diffHours * 10) / 10;
-
-      if (diffHours < 0) {
-        timeRemainingLabel = `Overdue by ${Math.abs(Math.round(diffHours))}h`;
-      } else if (diffHours < 24) {
-        timeRemainingLabel = `${Math.max(1, Math.round(diffHours))}h remaining`;
-      } else {
-        const days = Math.ceil(diffHours / 24);
-        timeRemainingLabel = `${days} day${days > 1 ? "s" : ""} remaining`;
-      }
     }
+    const timeRemainingLabel = deadlineEval.timeRemainingLabel;
+    const cleanItemTitle = formatTaskTitle(t.title, t.course?.code);
 
     const rankedItem: RankedAcademicItem = {
       id: t.id,
       itemType: "TASK",
-      title: t.title,
+      title: cleanItemTitle,
       courseCode: t.course?.code || null,
       courseTitle: t.course?.title || null,
       category: t.category,
       deadline: t.deadline,
-      normalizedDeadline: t.normalizedDeadline,
+      normalizedDeadline: t.deadline ? deadlineEval.normalizedDeadlineDisplay : (t.normalizedDeadline || "Scheduled"),
       status: isOverdue ? "OVERDUE" : t.status,
       marks: t.weightage,
       weightage: t.weightage,
@@ -315,11 +305,15 @@ export async function getFullAcademicState(
     else if (topCandidate.priorityLevel === "CRITICAL") focusMins = 90;
     else if (topCandidate.category === "QUIZ" || topCandidate.category === "LAB") focusMins = 45;
 
+    const cleanCandTitle = formatTaskTitle(topCandidate.title, topCandidate.courseCode);
     recommendation = {
-      recommendedItem: topCandidate,
+      recommendedItem: {
+        ...topCandidate,
+        title: cleanCandTitle,
+      },
       headline: topCandidate.isOverdue
-        ? `Overdue Recovery: ${topCandidate.title}`
-        : `Primary Focus: ${topCandidate.title}`,
+        ? `Overdue Recovery: ${cleanCandTitle}`
+        : `Primary Focus: ${cleanCandTitle}`,
       actionAdvice: `Allocate a structured ${focusMins}-minute focus session today to complete and verify submission requirements.`,
       reasons,
       estimatedTimeBlockMinutes: focusMins,

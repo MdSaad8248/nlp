@@ -21,6 +21,9 @@ import {
   Layers,
 } from "lucide-react";
 
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+
 interface SyllabusModule {
   moduleNumber: number | string;
   title: string;
@@ -42,9 +45,12 @@ interface SyllabusRecord {
   updatedAt: string;
 }
 
-export default function SyllabusPage() {
+function SyllabusContent() {
+  const searchParams = useSearchParams();
+  const queryCourseCode = searchParams.get("courseCode")?.toUpperCase() || null;
+
   const [syllabi, setSyllabi] = useState<SyllabusRecord[]>([]);
-  const [selectedCode, setSelectedCode] = useState<string>("CSE4001");
+  const [selectedCode, setSelectedCode] = useState<string>(queryCourseCode || "CSE4001");
   const [activeSyllabus, setActiveSyllabus] = useState<SyllabusRecord | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -77,7 +83,8 @@ export default function SyllabusPage() {
       if (data.success && Array.isArray(data.syllabi)) {
         setSyllabi(data.syllabi);
         if (data.syllabi.length > 0) {
-          const match = data.syllabi.find((s: SyllabusRecord) => s.courseCode === selectedCode) || data.syllabi[0];
+          const targetCode = queryCourseCode || selectedCode;
+          const match = data.syllabi.find((s: SyllabusRecord) => s.courseCode === targetCode) || data.syllabi[0];
           setSelectedCode(match.courseCode);
           setActiveSyllabus(match);
         }
@@ -91,7 +98,8 @@ export default function SyllabusPage() {
 
   useEffect(() => {
     fetchSyllabi();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryCourseCode]);
 
   const handleSelectCourse = (code: string) => {
     setSelectedCode(code);
@@ -203,8 +211,8 @@ export default function SyllabusPage() {
                 letterSpacing: "0.08em",
                 padding: "0.15rem 0.5rem",
                 borderRadius: "4px",
-                background: "rgba(37, 99, 235, 0.1)",
-                color: "#2563eb",
+                background: "rgba(52, 72, 165, 0.08)",
+                color: "#3448A5",
               }}
             >
               Curriculum Grounding
@@ -231,13 +239,13 @@ export default function SyllabusPage() {
               gap: "0.45rem",
               padding: "0.6rem 1rem",
               borderRadius: "8px",
-              background: "#2563eb",
+              background: "#3448A5",
               color: "#ffffff",
               border: "none",
               fontWeight: 600,
               fontSize: "0.84rem",
               cursor: "pointer",
-              boxShadow: "0 2px 10px rgba(37, 99, 235, 0.3)",
+              boxShadow: "0 2px 10px rgba(52, 72, 165, 0.25)",
             }}
           >
             <Upload size={15} />
@@ -256,7 +264,7 @@ export default function SyllabusPage() {
           paddingBottom: "0.35rem",
         }}
       >
-        {["CSE4001", "CSE3002", "CSE2001", "CSE2004", "CSE3001", "MAT2001"].map((code) => {
+        {Array.from(new Set(["CSE4001", "CSE3002", "CSE2004", "CSE2001", "CSE3001", "MAT2001", ...syllabi.map((s) => s.courseCode)])).map((code) => {
           const isSelected = selectedCode === code;
           const hasUploaded = syllabi.some((s) => s.courseCode === code);
 
@@ -271,9 +279,9 @@ export default function SyllabusPage() {
                 gap: "0.45rem",
                 padding: "0.55rem 0.95rem",
                 borderRadius: "8px",
-                border: isSelected ? "2px solid #2563eb" : "1px solid var(--border-default)",
-                background: isSelected ? "rgba(37, 99, 235, 0.08)" : "var(--bg-surface)",
-                color: isSelected ? "#2563eb" : "var(--text-primary)",
+                border: isSelected ? "2px solid #3448A5" : "1px solid var(--border-default)",
+                background: isSelected ? "rgba(52, 72, 165, 0.08)" : "var(--bg-surface)",
+                color: isSelected ? "#3448A5" : "var(--text-primary)",
                 fontWeight: 700,
                 fontSize: "0.82rem",
                 cursor: "pointer",
@@ -443,7 +451,7 @@ export default function SyllabusPage() {
                         }}
                       >
                         <span style={{ color: "var(--text-primary)" }}>{a.component}: </span>
-                        <span style={{ color: "#2563eb", fontWeight: 700 }}>{a.weight}%</span>
+                        <span style={{ color: "#3448A5", fontWeight: 700 }}>{a.weight}%</span>
                       </div>
                     ))}
                   </div>
@@ -484,7 +492,7 @@ export default function SyllabusPage() {
                 style={{
                   padding: "0.6rem 1.1rem",
                   borderRadius: "8px",
-                  background: "#2563eb",
+                  background: "#3448A5",
                   color: "#ffffff",
                   border: "none",
                   fontWeight: 600,
@@ -521,7 +529,7 @@ export default function SyllabusPage() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <Bot size={18} color="#2563eb" />
+              <Bot size={18} color="#3448A5" />
               <div>
                 <div style={{ fontSize: "0.88rem", fontWeight: 700, color: "var(--text-primary)" }}>
                   Grounded Syllabus Assistant
@@ -537,8 +545,8 @@ export default function SyllabusPage() {
                 fontWeight: 700,
                 padding: "0.15rem 0.45rem",
                 borderRadius: "4px",
-                background: "rgba(99, 102, 241, 0.1)",
-                color: "#6366f1",
+                background: "rgba(52, 72, 165, 0.08)",
+                color: "#3448A5",
               }}
             >
               ZERO-FABRICATION
@@ -571,7 +579,7 @@ export default function SyllabusPage() {
                   style={{
                     padding: "0.75rem 1rem",
                     borderRadius: msg.role === "user" ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
-                    background: msg.role === "user" ? "#2563eb" : "var(--bg-canvas)",
+                    background: msg.role === "user" ? "#3448A5" : "var(--bg-canvas)",
                     color: msg.role === "user" ? "#ffffff" : "var(--text-primary)",
                     border: msg.role === "user" ? "none" : "1px solid var(--border-subtle)",
                     fontSize: "0.84rem",
@@ -595,7 +603,7 @@ export default function SyllabusPage() {
                     }}
                   >
                     <span>Cited from:</span>
-                    <span style={{ fontWeight: 600, color: "#2563eb" }}>{msg.evidence.join(", ")}</span>
+                    <span style={{ fontWeight: 600, color: "#3448A5" }}>{msg.evidence.join(", ")}</span>
                   </div>
                 )}
               </div>
@@ -678,7 +686,7 @@ export default function SyllabusPage() {
               style={{
                 padding: "0.6rem 0.95rem",
                 borderRadius: "8px",
-                background: "#2563eb",
+                background: "#3448A5",
                 color: "#ffffff",
                 border: "none",
                 cursor: "pointer",
@@ -723,7 +731,7 @@ export default function SyllabusPage() {
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <Upload size={18} color="#2563eb" />
+                <Upload size={18} color="#3448A5" />
                 <h3 style={{ fontSize: "1.15rem", fontWeight: 700, margin: 0, color: "var(--text-primary)" }}>
                   Upload & Index Course Syllabus
                 </h3>
@@ -865,7 +873,7 @@ export default function SyllabusPage() {
                     padding: "0.6rem 1.25rem",
                     borderRadius: "6px",
                     border: "none",
-                    background: "#2563eb",
+                    background: "#3448A5",
                     color: "#ffffff",
                     fontWeight: 700,
                     cursor: "pointer",
@@ -880,5 +888,13 @@ export default function SyllabusPage() {
       )}
     </div>
   </Shell>
+  );
+}
+
+export default function SyllabusPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: "2rem", textAlign: "center" }}>Loading syllabus...</div>}>
+      <SyllabusContent />
+    </Suspense>
   );
 }

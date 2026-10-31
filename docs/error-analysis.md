@@ -1,6 +1,6 @@
 # AcademicAI — Error Analysis & Boundary Report (Milestone 8-E)
 
-**Generated:** 2026-10-24T07:25:58.611Z  
+**Generated:** 2026-10-28T18:50:28.425Z  
 **Dataset Split:** TEST Split (Untouched, Unseen Edge Cases)  
 **Total Failures Observed on TEST Split:** 3  
 **Scientific Integrity Standard:** Zero Hidden Failures, Explicit Root-Cause Categorization

@@ -23,6 +23,7 @@ import {
   Layers,
 } from "lucide-react";
 import Link from "next/link";
+import { formatTaskTitle, formatDescription } from "@/lib/utils/formatters";
 
 interface AdaptiveNotificationDTO {
   id: string;
@@ -575,7 +576,7 @@ export default function NotificationsPage() {
                     fontFamily: "var(--font-display)",
                   }}
                 >
-                  {item.title}
+                  {formatTaskTitle(item.title, item.courseCode)}
                 </span>
                 {item.courseCode && (
                   <span className="badge badge-academic" style={{ fontSize: "0.62rem" }}>
@@ -620,7 +621,7 @@ export default function NotificationsPage() {
                 margin: "0 0 0.5rem 0",
               }}
             >
-              {item.message}
+              {formatDescription(item.message)}
             </p>
 
             {/* Expandable "Why this notification?" checklist */}

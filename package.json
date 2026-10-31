@@ -11,7 +11,10 @@
     "test:all": "npx tsx scripts/test-all.ts",
     "test:auth": "npx tsx scripts/test-auth-isolation.ts",
     "test:eval": "npx tsx scripts/test-milestone8-final-evaluation.ts",
+    "test:faculty": "npx tsx scripts/test-faculty-workflows-e2e.ts",
     "seed": "npx tsx scripts/cleanup-and-seed-demo.ts",
+    "seed:faculty": "npx tsx scripts/seed-faculty-data.ts",
+    "seed:large": "npx tsx scripts/seed-large-dataset.ts",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio"

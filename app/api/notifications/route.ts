@@ -3,11 +3,14 @@ import {
   getStudentNotifications,
   syncAdaptiveNotifications,
 } from "@/lib/intelligence";
+import { getAuthenticatedUser } from "@/lib/auth/session-service";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId") || undefined;
+    const authUser = await getAuthenticatedUser(req);
+    // If authenticated, always scope strictly to authenticated user's ID
+    const userId = authUser ? authUser.id : (searchParams.get("userId") || undefined);
     const shouldSync = searchParams.get("sync") === "true";
 
     if (shouldSync) {
@@ -30,7 +33,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const userId = body.userId || undefined;
+    const authUser = await getAuthenticatedUser(req);
+    const userId = authUser ? authUser.id : (body.userId || undefined);
     const now = body.now ? new Date(body.now) : new Date();
 
     const result = await syncAdaptiveNotifications(userId, now);

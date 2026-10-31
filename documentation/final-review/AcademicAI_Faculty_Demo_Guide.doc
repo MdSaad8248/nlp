@@ -1,0 +1,215 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>AcademicAI — Practical Faculty Demonstration Guide</title>
+<!--[if gte mso 9]>
+<xml>
+ <w:WordDocument>
+  <w:View>Print</w:View>
+  <w:Zoom>100</w:Zoom>
+  <w:DoNotOptimizeForBrowser/>
+ </w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+@page {
+  size: 8.5in 11.0in;
+  margin: 1.0in;
+}
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.4;
+  color: #1a1a1a;
+}
+h1 {
+  font-size: 17pt;
+  font-weight: bold;
+  color: #047857;
+  border-bottom: 2px solid #047857;
+  padding-bottom: 4pt;
+  margin-top: 14pt;
+  margin-bottom: 8pt;
+}
+h2 {
+  font-size: 13pt;
+  font-weight: bold;
+  color: #065f46;
+  margin-top: 14pt;
+  margin-bottom: 6pt;
+  border-bottom: 1px solid #a7f3d0;
+  padding-bottom: 2pt;
+}
+h3 {
+  font-size: 11pt;
+  font-weight: bold;
+  color: #0f172a;
+  margin-top: 10pt;
+  margin-bottom: 4pt;
+}
+p {
+  margin-top: 0;
+  margin-bottom: 6pt;
+  text-align: justify;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6pt;
+  margin-bottom: 12pt;
+  font-size: 9.5pt;
+}
+th {
+  background-color: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  padding: 5pt;
+  text-align: left;
+  font-weight: bold;
+  color: #065f46;
+}
+td {
+  border: 1px solid #d1fae5;
+  padding: 4.5pt;
+  vertical-align: top;
+}
+pre {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 6pt 8pt;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 9pt;
+  border-radius: 4px;
+  margin-bottom: 8pt;
+}
+.banner {
+  background-color: #f0fdf4;
+  border-left: 4px solid #10b981;
+  padding: 8pt 12pt;
+  margin-bottom: 12pt;
+}
+.say-box {
+  background-color: #eff6ff;
+  border-left: 3px solid #3b82f6;
+  padding: 5pt 10pt;
+  font-style: italic;
+  margin: 4pt 0 8pt 0;
+  color: #1e3a8a;
+}
+</style>
+</head>
+<body>
+
+<h1>AcademicAI — Practical Faculty Demonstration Guide</h1>
+
+<div class="banner">
+  <strong>Project:</strong> AcademicAI — NLP-Based Academic Intelligence and Personalized Student Assistance Platform<br>
+  <strong>Target Course:</strong> CSI4001 — Natural Language Processing and Computational Linguistics (EPJ)<br>
+  <strong>Evaluator:</strong> Prof. Vijayarajan V, School of Computer Science and Engineering, VIT<br>
+  <strong>Anchor Date:</strong> October 31, 2026 &bull; <strong>System Status:</strong> 100% Operational (11/11 automated suites passing)
+</div>
+
+<h2>1. Demonstration Setup & Access Credentials</h2>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 25%;">Persona</th>
+      <th style="width: 30%;">Email / Identifier</th>
+      <th style="width: 15%;">Password</th>
+      <th style="width: 30%;">Assigned Role & Courses</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Primary Student</strong></td>
+      <td><code>student@academic.ai</code> / <code>21BDS0142</code></td>
+      <td><code>student123</code></td>
+      <td>Student: CSE4001, CSE3002, CSE2004</td>
+    </tr>
+    <tr>
+      <td><strong>Primary Faculty (NLP)</strong></td>
+      <td><code>faculty.raman@academic.ai</code></td>
+      <td><code>teacher123</code></td>
+      <td>Faculty Lead: <strong>CSE4001</strong> (Dr. P. Raman)</td>
+    </tr>
+    <tr>
+      <td><strong>Faculty (ML)</strong></td>
+      <td><code>faculty.kulkarni@academic.ai</code></td>
+      <td><code>teacher123</code></td>
+      <td>Faculty Lead: <strong>CSE3002</strong> (Dr. S. Kulkarni)</td>
+    </tr>
+    <tr>
+      <td><strong>Faculty (OS)</strong></td>
+      <td><code>faculty.swaminathan@academic.ai</code></td>
+      <td><code>teacher123</code></td>
+      <td>Faculty Lead: <strong>CSE2004</strong> (Dr. K. Swaminathan)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>2. 12-Step Step-by-Step Practical Demonstration Protocol</h2>
+
+<h3>Step 1: Student Command Dashboard (/dashboard)</h3>
+<p><strong>Action:</strong> Open <code>http://localhost:3000/dashboard</code>.<br>
+<strong>Point Out:</strong> Header greeting with real-time Asia/Kolkata date: <strong>Sat, 31 Oct 2026</strong>. 4 metric tiles (Upcoming Deadlines, Active Courses, Tasks Pending, Overall Progress). Today's prioritized tasks with factor badges. 7-day cognitive workload distribution chart.</p>
+<div class="say-box">
+  "AcademicAI grounds every view in the current academic date—October 31, 2026. Deadlines are prioritized deterministically based on deadline proximity and course weightage to prevent cognitive overload."
+</div>
+
+<h3>Step 2: Ingesting an Unstructured Academic Notice (/inbox)</h3>
+<p><strong>Action:</strong> Open <code>/inbox</code>. Paste the circular:<br>
+<em>"All students registered in Natural Language Processing (CSE4001) must submit their Capstone Project Interim Report on Canvas by this Wednesday, November 4, 2026 at 11:59 PM IST. Weightage: 20 marks. Late submissions will incur a 2-mark penalty."</em><br>
+Click <strong>Analyze Notice</strong>.<br>
+<strong>Verify:</strong> Extracted Category: ASSIGNMENT/PROJECT, Course: CSE4001, Platform: Canvas, Normalized Deadline: Nov 4, 2026 11:59 PM IST, Priority: HIGH (Score: 65). Click <strong>Confirm & Create Task</strong>.</p>
+<div class="say-box">
+  "The NLP pipeline extracts the academic intent, course code, submission platform, and normalizes the conversational relative deadline into an absolute timestamp in Indian Standard Time."
+</div>
+
+<h3>Step 3: Demonstrating 5-Way Notice Change Intelligence</h3>
+<p><strong>Action:</strong> In <code>/inbox</code>, paste the rescheduled circular:<br>
+<em>"Due to the upcoming placement drive, the Capstone Project Interim Report deadline originally due on November 4 has been postponed to Saturday, November 7, 2026 at 5:00 PM IST on Canvas."</em><br>
+Click <strong>Analyze Notice</strong>.<br>
+<strong>Verify:</strong> Notice Relationship Badge: <code>RESCHEDULED</code>. Audit Diff: Nov 4 &rarr; Nov 7. Click <strong>Apply Reschedule</strong>.</p>
+<div class="say-box">
+  "AcademicAI does not create a redundant task. Its 5-way change intelligence recognizes this as a reschedule, logs an immutable diff, and updates the existing deliverable."
+</div>
+
+<h3>Step 4: Circular Cancellation & Zero Fabrication Check</h3>
+<p><strong>Action:</strong> In <code>/inbox</code>, paste:<br>
+<em>"Tomorrow's guest lecture in SJT 402 has been cancelled due to speaker illness."</em><br>
+<strong>Verify:</strong> Category: CLASS_CANCELLATION, Relationship: CANCELLED. Status marked CANCELLED and purged from the active cognitive workload radar.</p>
+
+<h3>Step 5: Task Management & Verifiable Evidence Drawer (/tasks)</h3>
+<p><strong>Action:</strong> Navigate to <code>/tasks</code>. Click on any task row.<br>
+<strong>Verify:</strong> Opens the Evidence Drawer displaying the exact verbatim snippet from the source notice. Demonstrates zero hallucination.</p>
+
+<h3>Step 6: Dynamic Syllabus Calendar (/calendar)</h3>
+<p><strong>Action:</strong> Navigate to <code>/calendar</code>.<br>
+<strong>Verify:</strong> Month view renders October 2026 with today (Oct 31) highlighted with a purple TODAY badge. Click <strong>Next Month (&gt;)</strong> to see November 2026 with the rescheduled task. Click <strong>Prev Month (&lt;)</strong> to see preserved historical September records.</p>
+
+<h3>Step 7: Cognitive Workload Radar & Risk Assessment (/analytics)</h3>
+<p><strong>Action:</strong> Navigate to <code>/analytics</code>.<br>
+<strong>Verify:</strong> Workload radar highlights 48-hour assessment clusters and explains quiet-hours notification suppression.</p>
+
+<h3>Step 8: Academic Assistant with Grounded Gating (/assistant)</h3>
+<p><strong>Action:</strong> Ask: <em>"What are my deadlines for CSE4001 this week?"</em> (Grounds strictly on database tasks).<br>
+Ask: <em>"Delete all my tasks for tomorrow."</em> (Enforces mandatory destructive mutation confirmation gating).</p>
+
+<h3>Step 9: Switching to Faculty Portal (Dr. P. Raman)</h3>
+<p><strong>Action:</strong> Open <code>/faculty-course-intelligence</code>.<br>
+<strong>Verify:</strong> Header displays <strong>Dr. P. Raman (FAC-NLP-01)</strong>. Scoped strictly to <strong>CSE4001</strong>. Cohort of 60 students (42 Submitted, 18 Not Submitted, 7 Overdue). Assessment collision warnings displayed.</p>
+
+<h3>Step 10: Syllabus & Rubric Management (/rubrics, /syllabus)</h3>
+<p><strong>Action:</strong> Open <code>/rubrics</code>.<br>
+<strong>Verify:</strong> 5-criterion Capstone rubric with criterion weights summing to exactly 100%.</p>
+
+<h3>Step 11: AI-Assisted Submission Evaluation (/faculty-review)</h3>
+<p><strong>Action:</strong> Open <code>/faculty-review</code>. Select student <code>21BDS0142</code> and click <strong>Evaluate Submission</strong>.<br>
+<strong>Verify:</strong> Suggests score <strong>82.5 / 100</strong> across 5 criteria, with verbatim explanatory quotes extracted from student document. Operates with 100% reliability via offline deterministic fallback if internet is unavailable.</p>
+
+<h3>Step 12: Faculty Approval & Permanent Grade Commitment</h3>
+<p><strong>Action:</strong> Adjust documentation slider from 16 to 18. Enter professor feedback. Click <strong>Approve & Finalize Grade</strong>.<br>
+<strong>Verify:</strong> Badge changes to green <strong>GRADED (84.5 / 100)</strong>, committing permanently to SQLite.</p>
+
+</body>
+</html>
+

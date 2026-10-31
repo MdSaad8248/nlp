@@ -168,10 +168,11 @@ export default function AcademicPulse({ events = DEFAULT_EVENTS }: AcademicPulse
             </span>
             <span
               style={{
-                fontSize: "0.65rem",
+                fontSize: "0.74rem",
                 fontFamily: "var(--font-sans)",
-                color: "var(--text-muted)",
-                letterSpacing: "0.02em",
+                color: "var(--text-secondary)",
+                fontWeight: 500,
+                letterSpacing: "0.01em",
               }}
             >
               {label}

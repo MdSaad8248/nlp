@@ -7,7 +7,7 @@ import {
   clearAuthCookie,
   getAuthenticatedUser,
 } from "@/lib/auth/session-service";
-import { setActiveSessionId } from "@/lib/auth/session";
+import { setActiveSessionId, registerUserSession } from "@/lib/auth/session";
 
 /**
  * POST /api/auth
@@ -97,21 +97,22 @@ export async function POST(req: NextRequest) {
       email: user.email,
     });
 
-    // Update in-memory session reference for any synchronous UI components
-    setActiveSessionId(user.id);
-
     const userProfile = {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: user.role,
-      rollNumber: user.rollNumber,
-      department: user.department,
-      program: user.program,
+      role: user.role as "STUDENT" | "TEACHER",
+      rollNumber: user.rollNumber || "",
+      department: user.department || undefined,
+      program: user.program || "",
       semester: user.semester,
       enrolledCourses: user.courses.map((c) => c.course.code),
       managedCourses: user.managedCourses.map((mc) => mc.course.code),
     };
+
+    // Update in-memory session reference and cache
+    setActiveSessionId(user.id);
+    registerUserSession(userProfile);
 
     const response = NextResponse.json({
       success: true,

@@ -1,8 +1,19 @@
 # AcademicAI — Academic Intelligence & Notice Automation Platform
 
-An academic productivity SaaS application designed for university course management, notice processing, temporal deadline reasoning, syllabus tracking, and assessment rubric intelligence.
+**Course:** CSI4001 — Natural Language Processing and Computational Linguistics (EPJ Component)  
+**School:** School of Computer Science and Engineering, Vellore Institute of Technology (VIT)  
+**Faculty Evaluator:** Prof. Vijayarajan V  
+**Semester:** Fall Semester 2026–27  
+**Build Status:** Production Ready (Compiled, 0 warnings, 11/11 automated test suites passing)
 
-Built for pairs of Students and Faculty members to streamline announcements, prevent missed deadlines, detect academic schedule conflicts, and extract deliverables from unstructured text and digital documents.
+---
+
+### 📌 Project Deliverables & Submission Quick Links
+- 🎥 **8-Minute Demonstration Video:** `[Paste your Google Drive Video Link Here]` *(Set share permissions to "Anyone with the link can view")*
+- 📄 **Official VIT Project-Only Report:** [`documentation/final-review/AcademicAI_Project_Only_Report.doc`](documentation/final-review/AcademicAI_Project_Only_Report.doc) | [`Markdown Report`](documentation/final-review/AcademicAI_Project_Only_Report.md)
+- 📋 **Faculty Demonstration Guide:** [`documentation/final-review/AcademicAI_Faculty_Demo_Guide.doc`](documentation/final-review/AcademicAI_Faculty_Demo_Guide.doc) | [`Markdown Guide`](documentation/final-review/AcademicAI_Faculty_Demo_Guide.md)
+- 🏛️ **End-to-End Technical Workflow:** [`documentation/final-review/AcademicAI_End_to_End_Technical_Workflow.doc`](documentation/final-review/AcademicAI_End_to_End_Technical_Workflow.doc) | [`Markdown Architecture`](documentation/final-review/AcademicAI_End_to_End_Technical_Workflow.md)
+- ✅ **Final System Verification Audit:** [`documentation/final-review/AcademicAI_Final_Verification_Report.md`](documentation/final-review/AcademicAI_Final_Verification_Report.md)
 
 ---
 

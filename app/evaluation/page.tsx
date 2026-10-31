@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Shell from "@/components/layout/Shell";
+import { useRouter } from "next/navigation";
+import { getCurrentSession, getClientCookieSession } from "@/lib/auth/session";
 import {
   FlaskConical,
   BarChart3,
@@ -41,8 +43,17 @@ interface EvaluationData {
 }
 
 export default function EvaluationPage() {
+  const router = useRouter();
   const [data, setData] = useState<EvaluationData | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Role guard: redirect students to /dashboard
+  useEffect(() => {
+    const session = getClientCookieSession();
+    if (session.role !== "TEACHER") {
+      router.replace("/dashboard");
+    }
+  }, [router]);
   const [activeTab, setActiveTab] = useState<"benchmark" | "matrix" | "perclass" | "errors" | "dataset" | "theory">("benchmark");
   
   // Filters for dataset inspector

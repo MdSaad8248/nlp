@@ -87,12 +87,6 @@ export default function AssistantPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Load config and sessions on mount
-  useEffect(() => {
-    fetchConfig();
-    fetchSessions();
-  }, []);
-
   const fetchConfig = async () => {
     try {
       const res = await fetch("/api/assistant/config");
@@ -121,6 +115,13 @@ export default function AssistantPage() {
       // ignore
     }
   };
+
+  // Load config and sessions on mount
+  useEffect(() => {
+    fetchConfig();
+    fetchSessions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const selectSession = async (sessionId: string) => {
     setActiveSessionId(sessionId);
@@ -642,7 +643,7 @@ export default function AssistantPage() {
                   width: "24px",
                   height: "24px",
                   borderRadius: "var(--radius-xs)",
-                  background: "linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)",
+                  background: "#3448A5",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",

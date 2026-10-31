@@ -1,134 +1,159 @@
 {
-  "total_test_samples": 53,
-  "total_errors": 0,
-  "transformer_accuracy": 1.0,
-  "confusion_patterns": {},
-  "sample_errors": [],
-  "sample_correct_predictions": [
+  "total_errors": 19,
+  "evaluated_samples": 53,
+  "error_rate": 35.8,
+  "misclassifications": [
     {
-      "id": "A0276",
       "text": "The Database Systems class scheduled for 23 October 2026 at 14:00 PM is cancelled.",
-      "ground_truth": "CLASS_CANCELLATION",
-      "predicted_transformer": "CLASS_CANCELLATION",
-      "confidence_transformer": 0.3759,
-      "predicted_baseline": "CLASS_CANCELLATION",
-      "top_candidates": [
-        [
-          "CLASS_CANCELLATION",
-          0.3759
-        ],
-        [
-          "CLASS_CHANGE",
-          0.1362
-        ],
-        [
-          "PROJECT_REVIEW",
-          0.0743
-        ]
-      ],
-      "course": "Database Systems",
-      "relationship": "CANCELLED"
+      "true_category": "CLASS_CANCELLATION",
+      "predicted_category": "GENERAL_ANNOUNCEMENT",
+      "confidence": 0.7,
+      "course_code": "CSE3003",
+      "error_type": "Fallback to General Announcement"
     },
     {
-      "id": "A0291",
-      "text": "Important information regarding Natural Language Processing will be shared on 10 October 2026. Students are advised to check Microsoft Teams regularly.",
-      "ground_truth": "GENERAL_ANNOUNCEMENT",
-      "predicted_transformer": "GENERAL_ANNOUNCEMENT",
-      "confidence_transformer": 0.2348,
-      "predicted_baseline": "GENERAL_ANNOUNCEMENT",
-      "top_candidates": [
-        [
-          "GENERAL_ANNOUNCEMENT",
-          0.2348
-        ],
-        [
-          "ASSIGNMENT",
-          0.1119
-        ],
-        [
-          "QUIZ",
-          0.1082
-        ]
-      ],
-      "course": "Natural Language Processing",
-      "relationship": "NEW"
-    },
-    {
-      "id": "A0241",
-      "text": "The submission deadline for Database Systems Assignment 3 is 25 October 2026. Late submissions may not be accepted.",
-      "ground_truth": "ASSIGNMENT",
-      "predicted_transformer": "ASSIGNMENT",
-      "confidence_transformer": 0.4257,
-      "predicted_baseline": "ASSIGNMENT",
-      "top_candidates": [
-        [
-          "ASSIGNMENT",
-          0.4257
-        ],
-        [
-          "PROJECT",
-          0.0864
-        ],
-        [
-          "CIRCULAR",
-          0.0779
-        ]
-      ],
-      "course": "Database Systems",
-      "relationship": "NEW"
-    },
-    {
-      "id": "A0002",
       "text": "Microprocessor and Microcontroller Techniques Project 5 report must be submitted on Microsoft Teams before 02 November 2026. The project carries 25 marks.",
-      "ground_truth": "PROJECT",
-      "predicted_transformer": "PROJECT",
-      "confidence_transformer": 0.412,
-      "predicted_baseline": "PROJECT",
-      "top_candidates": [
-        [
-          "PROJECT",
-          0.412
-        ],
-        [
-          "ASSIGNMENT",
-          0.0911
-        ],
-        [
-          "CIRCULAR",
-          0.089
-        ]
-      ],
-      "course": "Microprocessor and Microcontroller Techniques",
-      "relationship": "NEW"
+      "true_category": "PROJECT",
+      "predicted_category": "ASSIGNMENT",
+      "confidence": 0.87,
+      "course_code": "CSE2006",
+      "error_type": "Misclassified as ASSIGNMENT"
     },
     {
-      "id": "A0312",
       "text": "Students are requested to note the following academic circular regarding Natural Language Processing, effective 11 October 2026.",
-      "ground_truth": "CIRCULAR",
-      "predicted_transformer": "CIRCULAR",
-      "confidence_transformer": 0.4846,
-      "predicted_baseline": "CIRCULAR",
-      "top_candidates": [
-        [
-          "CIRCULAR",
-          0.4846
-        ],
-        [
-          "PROJECT",
-          0.0743
-        ],
-        [
-          "ASSIGNMENT",
-          0.0654
-        ]
-      ],
-      "course": "Natural Language Processing",
-      "relationship": "NEW"
+      "true_category": "CIRCULAR",
+      "predicted_category": "GENERAL_ANNOUNCEMENT",
+      "confidence": 0.7,
+      "course_code": "CSE4001",
+      "error_type": "Fallback to General Announcement"
+    },
+    {
+      "text": "There will be no Microprocessor and Microcontroller Techniques class on 29 October 2026 at 11:45 AM due to an institutional activity.",
+      "true_category": "CLASS_CANCELLATION",
+      "predicted_category": "GENERAL_ANNOUNCEMENT",
+      "confidence": 0.7,
+      "course_code": "CSE2006",
+      "error_type": "Fallback to General Announcement"
+    },
+    {
+      "text": "This circular informs students of Database Systems about an academic procedure effective from 12 October 2026. Please follow the instructions shared by the depa...",
+      "true_category": "CIRCULAR",
+      "predicted_category": "GENERAL_ANNOUNCEMENT",
+      "confidence": 0.7,
+      "course_code": "CSE3003",
+      "error_type": "Fallback to General Announcement"
+    },
+    {
+      "text": "The Database Systems class scheduled for 21 October 2026 at 15:30 PM has been shifted to 23 October 2026 at 16:15 PM. Venue: Online.",
+      "true_category": "CLASS_CHANGE",
+      "predicted_category": "GENERAL_ANNOUNCEMENT",
+      "confidence": 0.7,
+      "course_code": "CSE3003",
+      "error_type": "Fallback to General Announcement"
+    },
+    {
+      "text": "Students must complete Project 6 for Database Systems and submit the required report by 24 October 2026.",
+      "true_category": "PROJECT",
+      "predicted_category": "GENERAL_ANNOUNCEMENT",
+      "confidence": 0.7,
+      "course_code": "CSE3003",
+      "error_type": "Fallback to General Announcement"
+    },
+    {
+      "text": "The Mid-Semester Examination examination for Natural Language Processing will be held on 03 October 2026 at 15:30 PM. Venue: CB-204.",
+      "true_category": "EXAM",
+      "predicted_category": "GENERAL_ANNOUNCEMENT",
+      "confidence": 0.7,
+      "course_code": "CSE4001",
+      "error_type": "Fallback to General Announcement"
+    },
+    {
+      "text": "This circular informs students of Database Systems about an academic procedure effective from 27 September 2026. Please follow the instructions shared by the de...",
+      "true_category": "CIRCULAR",
+      "predicted_category": "GENERAL_ANNOUNCEMENT",
+      "confidence": 0.7,
+      "course_code": "CSE3003",
+      "error_type": "Fallback to General Announcement"
+    },
+    {
+      "text": "Students must complete Project 5 for Machine Learning and submit the required report by 09 October 2026.",
+      "true_category": "PROJECT",
+      "predicted_category": "GENERAL_ANNOUNCEMENT",
+      "confidence": 0.7,
+      "course_code": "CSE3002",
+      "error_type": "Fallback to General Announcement"
+    },
+    {
+      "text": "The Operating Systems class scheduled for 28 October 2026 at 11:45 AM is cancelled.",
+      "true_category": "CLASS_CANCELLATION",
+      "predicted_category": "GENERAL_ANNOUNCEMENT",
+      "confidence": 0.7,
+      "course_code": "CSE2004",
+      "error_type": "Fallback to General Announcement"
+    },
+    {
+      "text": "This circular informs students of Database Systems about an academic procedure effective from 27 October 2026. Please follow the instructions shared by the depa...",
+      "true_category": "CIRCULAR",
+      "predicted_category": "GENERAL_ANNOUNCEMENT",
+      "confidence": 0.7,
+      "course_code": "CSE3003",
+      "error_type": "Fallback to General Announcement"
+    },
+    {
+      "text": "There will be no Operating Systems class on 25 October 2026 at 10:15 AM due to an institutional activity.",
+      "true_category": "CLASS_CANCELLATION",
+      "predicted_category": "GENERAL_ANNOUNCEMENT",
+      "confidence": 0.7,
+      "course_code": "CSE2004",
+      "error_type": "Fallback to General Announcement"
+    },
+    {
+      "text": "Database Systems Project 8 report must be submitted on Google Classroom before 23 September 2026. The project carries 5 marks.",
+      "true_category": "PROJECT",
+      "predicted_category": "ASSIGNMENT",
+      "confidence": 0.87,
+      "course_code": "CSE3003",
+      "error_type": "Misclassified as ASSIGNMENT"
+    },
+    {
+      "text": "Students are requested to note the following academic circular regarding Database Systems, effective 19 September 2026.",
+      "true_category": "CIRCULAR",
+      "predicted_category": "GENERAL_ANNOUNCEMENT",
+      "confidence": 0.7,
+      "course_code": "CSE3003",
+      "error_type": "Fallback to General Announcement"
+    },
+    {
+      "text": "Machine Learning Project 4 report must be submitted on VTOP before 23 October 2026. The project carries 25 marks.",
+      "true_category": "PROJECT",
+      "predicted_category": "ASSIGNMENT",
+      "confidence": 0.87,
+      "course_code": "CSE3002",
+      "error_type": "Misclassified as ASSIGNMENT"
+    },
+    {
+      "text": "A Project Presentation related to Operating Systems will be conducted on 19 October 2026 at 15:00 PM in CB-204.",
+      "true_category": "ACADEMIC_EVENT",
+      "predicted_category": "GENERAL_ANNOUNCEMENT",
+      "confidence": 0.7,
+      "course_code": "CSE2004",
+      "error_type": "Fallback to General Announcement"
+    },
+    {
+      "text": "The Database Systems class scheduled for 06 October 2026 at 10:00 AM has been shifted to 09 October 2026 at 16:00 PM. Venue: Online.",
+      "true_category": "CLASS_CHANGE",
+      "predicted_category": "GENERAL_ANNOUNCEMENT",
+      "confidence": 0.7,
+      "course_code": "CSE3003",
+      "error_type": "Fallback to General Announcement"
+    },
+    {
+      "text": "There will be no Operating Systems class on 02 October 2026 at 11:00 AM due to an institutional activity.",
+      "true_category": "CLASS_CANCELLATION",
+      "predicted_category": "GENERAL_ANNOUNCEMENT",
+      "confidence": 0.7,
+      "course_code": "CSE2004",
+      "error_type": "Fallback to General Announcement"
     }
-  ],
-  "summary_insights": [
-    "The fine-tuned DistilBERT transformer demonstrates strong syntactic and semantic discrimination across structured academic notices.",
-    "Any observed errors primarily stem from borderline notices with compound keywords (e.g. project deliverables with review terminology, or administrative circulars).",
-    "The configured confidence threshold (< 0.70) reliably captures these edge cases to route them to secondary rule-based or human review."
   ]
 }

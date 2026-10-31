@@ -38,7 +38,13 @@ interface RubricRecord {
   updatedAt: string;
 }
 
-export default function RubricsPage() {
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+
+function RubricsContent() {
+  const searchParams = useSearchParams();
+  const queryCourseCode = searchParams.get("courseCode")?.toUpperCase() || null;
+
   const [rubrics, setRubrics] = useState<RubricRecord[]>([]);
   const [activeRubric, setActiveRubric] = useState<RubricRecord | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -55,7 +61,7 @@ export default function RubricsPage() {
 
   // Upload modal state
   const [modalOpen, setModalOpen] = useState(false);
-  const [uploadCourseCode, setUploadCourseCode] = useState("CSE4001");
+  const [uploadCourseCode, setUploadCourseCode] = useState(queryCourseCode || "CSE4001");
   const [uploadTaskTitle, setUploadTaskTitle] = useState("");
   const [uploadTotalMarks, setUploadTotalMarks] = useState("100");
   const [uploadText, setUploadText] = useState("");
@@ -70,7 +76,10 @@ export default function RubricsPage() {
       if (data.success && Array.isArray(data.rubrics)) {
         setRubrics(data.rubrics);
         if (data.rubrics.length > 0) {
-          setActiveRubric(data.rubrics[0]);
+          const match = queryCourseCode
+            ? data.rubrics.find((r: RubricRecord) => r.courseCode.toUpperCase() === queryCourseCode)
+            : null;
+          setActiveRubric(match || data.rubrics[0]);
         }
       }
     } catch (e) {
@@ -82,7 +91,8 @@ export default function RubricsPage() {
 
   useEffect(() => {
     fetchRubrics();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryCourseCode]);
 
   const handleAsk = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -217,13 +227,13 @@ export default function RubricsPage() {
             gap: "0.45rem",
             padding: "0.6rem 1rem",
             borderRadius: "8px",
-            background: "#2563eb",
+            background: "#3448A5",
             color: "#ffffff",
             border: "none",
             fontWeight: 600,
             fontSize: "0.84rem",
             cursor: "pointer",
-            boxShadow: "0 2px 10px rgba(37, 99, 235, 0.3)",
+            boxShadow: "0 2px 10px rgba(52, 72, 165, 0.25)",
           }}
         >
           <Upload size={15} />
@@ -246,8 +256,8 @@ export default function RubricsPage() {
                 alignItems: "flex-start",
                 padding: "0.75rem 1rem",
                 borderRadius: "10px",
-                border: isSelected ? "2px solid #2563eb" : "1px solid var(--border-default)",
-                background: isSelected ? "rgba(37, 99, 235, 0.08)" : "var(--bg-surface)",
+                border: isSelected ? "2px solid #3448A5" : "1px solid var(--border-default)",
+                background: isSelected ? "rgba(52, 72, 165, 0.08)" : "var(--bg-surface)",
                 cursor: "pointer",
                 textAlign: "left",
                 minWidth: "240px",
@@ -255,7 +265,7 @@ export default function RubricsPage() {
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
-                <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "#2563eb" }}>
+                <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "#3448A5" }}>
                   {r.courseCode}
                 </span>
                 <span style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>
@@ -315,7 +325,7 @@ export default function RubricsPage() {
                   </div>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: "1.1rem", fontWeight: 800, color: "#2563eb" }}>
+                  <div style={{ fontSize: "1.1rem", fontWeight: 800, color: "#3448A5" }}>
                     {activeRubric.totalMarks} Marks
                   </div>
                   <div style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>Total Weightage</div>
@@ -363,7 +373,7 @@ export default function RubricsPage() {
                   >
                     <div style={{ flex: 1 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.25rem" }}>
-                        <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#2563eb" }}>
+                        <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#3448A5" }}>
                           #{idx + 1}
                         </span>
                         <span style={{ fontSize: "0.88rem", fontWeight: 700, color: "var(--text-primary)" }}>
@@ -383,8 +393,8 @@ export default function RubricsPage() {
                           fontWeight: 700,
                           padding: "0.2rem 0.6rem",
                           borderRadius: "4px",
-                          background: "rgba(37, 99, 235, 0.1)",
-                          color: "#2563eb",
+                          background: "rgba(52, 72, 165, 0.08)",
+                          color: "#3448A5",
                           whiteSpace: "nowrap",
                         }}
                       >
@@ -484,7 +494,7 @@ export default function RubricsPage() {
                   style={{
                     padding: "0.75rem 1rem",
                     borderRadius: msg.role === "user" ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
-                    background: msg.role === "user" ? "#2563eb" : "var(--bg-canvas)",
+                    background: msg.role === "user" ? "#3448A5" : "var(--bg-canvas)",
                     color: msg.role === "user" ? "#ffffff" : "var(--text-primary)",
                     border: msg.role === "user" ? "none" : "1px solid var(--border-subtle)",
                     fontSize: "0.84rem",
@@ -571,7 +581,7 @@ export default function RubricsPage() {
               style={{
                 padding: "0.6rem 0.95rem",
                 borderRadius: "8px",
-                background: "#2563eb",
+                background: "#3448A5",
                 color: "#ffffff",
                 border: "none",
                 cursor: "pointer",
@@ -613,7 +623,7 @@ export default function RubricsPage() {
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <Upload size={18} color="#2563eb" />
+                <Upload size={18} color="#3448A5" />
                 <h3 style={{ fontSize: "1.15rem", fontWeight: 700, margin: 0, color: "var(--text-primary)" }}>
                   Upload & Index Assessment Rubric
                 </h3>
@@ -757,7 +767,7 @@ export default function RubricsPage() {
                     padding: "0.6rem 1.25rem",
                     borderRadius: "6px",
                     border: "none",
-                    background: "#2563eb",
+                    background: "#3448A5",
                     color: "#ffffff",
                     fontWeight: 700,
                     cursor: "pointer",
@@ -772,5 +782,13 @@ export default function RubricsPage() {
       )}
     </div>
   </Shell>
+  );
+}
+
+export default function RubricsPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: "2rem", textAlign: "center" }}>Loading rubrics...</div>}>
+      <RubricsContent />
+    </Suspense>
   );
 }

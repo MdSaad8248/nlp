@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Shell from "@/components/layout/Shell";
+import { useRouter } from "next/navigation";
+import { getClientCookieSession } from "@/lib/auth/session";
 import {
   GraduationCap,
   Sparkles,
@@ -21,6 +23,10 @@ import {
   ChevronRight,
   Eye,
   RefreshCw,
+  Send,
+  Award,
+  X,
+  CheckSquare,
 } from "lucide-react";
 import {
   FACULTY_DEMO_CASES,
@@ -47,20 +53,144 @@ const PIPELINE_STAGES = [
 ];
 
 export default function FacultyReviewPage() {
+  const router = useRouter();
   const [selectedCaseId, setSelectedCaseId] = useState<string>("demo-1");
   const [executionResults, setExecutionResults] = useState<Record<string, DemoExecutionResult>>({});
   const [loadingCaseId, setLoadingCaseId] = useState<string | null>(null);
   const [isRunningAll, setIsRunningAll] = useState(false);
-  const [activeTab, setActiveTab] = useState<"demos" | "pipeline" | "evidence" | "evaluation">("demos");
+  const [activeTab, setActiveTab] = useState<"queue" | "demos" | "pipeline" | "evidence" | "evaluation">("queue");
   const [activeStageFilter, setActiveStageFilter] = useState<string | null>(null);
+
+  // Live Review Queue State
+  const [reviewQueue, setReviewQueue] = useState<any[]>([]);
+  const [queueLoading, setQueueLoading] = useState(true);
+  const [selectedQueueItem, setSelectedQueueItem] = useState<any | null>(null);
+  const [gradingScore, setGradingScore] = useState<string>("90");
+  const [gradingFeedback, setGradingFeedback] = useState<string>("");
+  const [gradingStatus, setGradingStatus] = useState<"COMPLETED" | "IN_PROGRESS">("COMPLETED");
+  const [submittingGrade, setSubmittingGrade] = useState(false);
+  const [reviewSuccessMsg, setReviewSuccessMsg] = useState<string | null>(null);
+  const [evaluatingTaskId, setEvaluatingTaskId] = useState<string | null>(null);
+  const [aiEvaluationData, setAiEvaluationData] = useState<any | null>(null);
 
   const selectedCase = FACULTY_DEMO_CASES.find((c) => c.id === selectedCaseId) || FACULTY_DEMO_CASES[0];
   const currentResult = executionResults[selectedCase.id];
 
-  // Auto-run first case on mount so faculty immediately sees live execution
+  // Role guard with server fallback & Auto-run first case on mount
   useEffect(() => {
+    const session = getClientCookieSession();
+    if (session.role !== "TEACHER") {
+      fetch("/api/auth")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.authenticated && data.user?.role === "TEACHER") {
+            document.cookie = `academic_student_id=${encodeURIComponent(data.user.id)}; path=/; max-age=604800; SameSite=Lax`;
+            document.cookie = `academic_user_role=TEACHER; path=/; max-age=604800; SameSite=Lax`;
+            fetchReviewQueue();
+            executeCase(selectedCase.id);
+          } else {
+            router.replace("/dashboard");
+          }
+        })
+        .catch(() => {
+          router.replace("/dashboard");
+        });
+      return;
+    }
+    fetchReviewQueue();
     executeCase(selectedCase.id);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
+
+  async function fetchReviewQueue() {
+    setQueueLoading(true);
+    try {
+      const res = await fetch("/api/submissions?status=NEEDS_REVIEW");
+      const data = await res.json();
+      if (data.success && Array.isArray(data.submissions)) {
+        setReviewQueue(data.submissions);
+      }
+    } catch (err) {
+      console.error("Failed to fetch review queue:", err);
+    } finally {
+      setQueueLoading(false);
+    }
+  }
+
+  const handleOpenQueueReview = (item: any) => {
+    setSelectedQueueItem(item);
+    setGradingScore(item.rubric ? String(Math.round(item.rubric.totalMarks * 0.9)) : "90");
+    setGradingFeedback(item.progress?.note || "Thorough submission. Approved with full credit.");
+    setGradingStatus("COMPLETED");
+    setReviewSuccessMsg(null);
+    if (!aiEvaluationData || aiEvaluationData.taskId !== (item.taskId || item.id)) {
+      setAiEvaluationData(null);
+    }
+  };
+
+  const handleTriggerAiEvaluation = async (item: any) => {
+    const targetTaskId = item.taskId || item.id;
+    setEvaluatingTaskId(targetTaskId);
+    try {
+      const res = await fetch("/api/submissions/evaluate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId: targetTaskId }),
+      });
+      const data = await res.json();
+      if (data.success && data.evaluation) {
+        setAiEvaluationData(data);
+        setSelectedQueueItem(item);
+        setGradingScore(String(data.evaluation.totalMarksAwarded));
+        const strengthsList = (data.evaluation.strengths || []).map((s: string) => `• ${s}`).join("\n");
+        const improvementsList = (data.evaluation.areasForImprovement || []).map((a: string) => `• ${a}`).join("\n");
+        setGradingFeedback(
+          `${data.evaluation.overallFeedback}\n\nKey Strengths:\n${strengthsList}\n\nAreas for Improvement:\n${improvementsList}`
+        );
+      } else {
+        alert(data.error || "Failed to complete AI evaluation.");
+      }
+    } catch (err: any) {
+      alert(err.message || "Failed to complete AI evaluation.");
+    } finally {
+      setEvaluatingTaskId(null);
+    }
+  };
+
+  const handleSaveQueueGrade = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedQueueItem) return;
+
+    setSubmittingGrade(true);
+    try {
+      const res = await fetch("/api/submissions", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          taskId: selectedQueueItem.taskId,
+          status: gradingStatus,
+          percentage: gradingStatus === "COMPLETED" ? 100 : 75,
+          feedback: gradingFeedback,
+          marks: gradingScore ? Number(gradingScore) : undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to commit review.");
+      }
+
+      setReviewSuccessMsg(`Review saved for ${selectedQueueItem.student.name}!`);
+      setTimeout(() => {
+        setSelectedQueueItem(null);
+        fetchReviewQueue();
+      }, 900);
+    } catch (err: any) {
+      alert(err.message || "Failed to save review.");
+    } finally {
+      setSubmittingGrade(false);
+    }
+  };
 
   async function executeCase(caseId: string) {
     setLoadingCaseId(caseId);
@@ -110,7 +240,7 @@ export default function FacultyReviewPage() {
     : FACULTY_DEMO_CASES;
 
   return (
-    <Shell>
+    <Shell userRole="TEACHER">
       <div style={{ maxWidth: "1280px", margin: "0 auto", paddingBottom: "3rem" }}>
         {/* Editorial Masthead */}
         <header
@@ -232,6 +362,7 @@ export default function FacultyReviewPage() {
             }}
           >
             {[
+              { id: "queue", label: "Live Review Queue", icon: GraduationCap, badge: reviewQueue.length },
               { id: "demos", label: "15 Live Demonstration Cases", icon: Play },
               { id: "pipeline", label: "NLP Intelligence Pipeline", icon: Layers },
               { id: "evidence", label: "Evidence & Trace Inspector", icon: Eye },
@@ -261,11 +392,466 @@ export default function FacultyReviewPage() {
                 >
                   <Icon size={15} />
                   <span>{tab.label}</span>
+                  {tab.badge !== undefined && tab.badge > 0 && (
+                    <span
+                      style={{
+                        background: isActive ? "var(--accent-primary)" : "rgba(234, 179, 8, 0.2)",
+                        color: isActive ? "#fff" : "#ca8a04",
+                        fontSize: "0.68rem",
+                        fontWeight: 700,
+                        padding: "0.1rem 0.4rem",
+                        borderRadius: "999px",
+                      }}
+                    >
+                      {tab.badge}
+                    </span>
+                  )}
                 </button>
               );
             })}
           </div>
         </header>
+
+        {/* ============================================================ */}
+        {/* TAB 0: LIVE REVIEW QUEUE */}
+        {/* ============================================================ */}
+        {activeTab === "queue" && (
+          <div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "1.25rem",
+              }}
+            >
+              <div>
+                <h2 style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+                  Submissions Awaiting Faculty Review ({reviewQueue.length})
+                </h2>
+                <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginTop: "0.2rem" }}>
+                  Items in this queue are student deliverables currently marked In-Progress or pending grading for your assigned courses.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={fetchReviewQueue}
+                disabled={queueLoading}
+                className="btn btn-secondary"
+                style={{ fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "0.4rem" }}
+              >
+                <RefreshCw size={13} className={queueLoading ? "spin-icon" : ""} />
+                <span>Refresh Queue</span>
+              </button>
+            </div>
+
+            {queueLoading ? (
+              <div
+                style={{
+                  padding: "3.5rem",
+                  textAlign: "center",
+                  background: "var(--bg-surface)",
+                  borderRadius: "var(--radius-md)",
+                  border: "1px solid var(--border-default)",
+                }}
+              >
+                <RefreshCw size={24} className="spin-icon" style={{ color: "var(--accent-primary)", margin: "0 auto 0.75rem" }} />
+                <div style={{ fontWeight: 600, color: "var(--text-primary)" }}>Loading live review queue...</div>
+              </div>
+            ) : reviewQueue.length === 0 ? (
+              <div
+                style={{
+                  padding: "4rem 2rem",
+                  textAlign: "center",
+                  background: "var(--bg-surface)",
+                  borderRadius: "var(--radius-md)",
+                  border: "1px solid var(--border-default)",
+                }}
+              >
+                <CheckCircle2 size={40} color="#16a34a" style={{ margin: "0 auto 0.75rem" }} />
+                <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text-primary)" }}>
+                  Review Queue Clear!
+                </div>
+                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginTop: "0.25rem", maxWidth: "520px", margin: "0.25rem auto 1.25rem" }}>
+                  No student assessment submissions currently require faculty review for your assigned courses. All submitted work is up to date.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => router.push("/submissions")}
+                  className="btn btn-secondary"
+                  style={{ fontSize: "0.82rem" }}
+                >
+                  View All Submissions &amp; Deliverables
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))", gap: "1rem" }}>
+                {reviewQueue.map((item) => (
+                  <div
+                    key={item.id}
+                    style={{
+                      background: "var(--bg-surface)",
+                      border: "1px solid var(--border-default)",
+                      borderRadius: "var(--radius-md)",
+                      padding: "1.25rem",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+                    }}
+                  >
+                    <div>
+                      {/* Top badges */}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.6rem" }}>
+                        <span
+                          style={{
+                            background: "rgba(234, 179, 8, 0.15)",
+                            color: "#ca8a04",
+                            padding: "0.15rem 0.5rem",
+                            borderRadius: "4px",
+                            fontSize: "0.7rem",
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Needs Review
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "0.72rem",
+                            fontWeight: 700,
+                            background: "var(--bg-canvas)",
+                            padding: "0.15rem 0.5rem",
+                            borderRadius: "4px",
+                            border: "1px solid var(--border-default)",
+                            color: "var(--text-secondary)",
+                          }}
+                        >
+                          {item.course.code}
+                        </span>
+                      </div>
+
+                      {/* Task title */}
+                      <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--text-primary)", margin: "0 0 0.35rem" }}>
+                        {item.title}
+                      </h3>
+
+                      {/* Student info */}
+                      <div style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
+                        Submitted by: <strong style={{ color: "var(--text-primary)" }}>{item.student.name}</strong> ({item.student.rollNumber})
+                      </div>
+
+                      {/* Progress note */}
+                      {item.progress?.note && (
+                        <div
+                          style={{
+                            background: "var(--bg-canvas)",
+                            padding: "0.6rem 0.75rem",
+                            borderRadius: "6px",
+                            fontSize: "0.78rem",
+                            color: "var(--text-muted)",
+                            fontStyle: "italic",
+                            marginBottom: "0.75rem",
+                            borderLeft: "3px solid var(--accent-primary)",
+                          }}
+                        >
+                          &ldquo;{item.progress.note}&rdquo;
+                        </div>
+                      )}
+
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "flex", gap: "1rem" }}>
+                        <span>Deadline: {item.deadlineDisplay}</span>
+                        <span>Platform: {item.submissionPlatform}</span>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: "1rem", paddingTop: "0.75rem", borderTop: "1px solid var(--border-default)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.5rem" }}>
+                      <button
+                        type="button"
+                        onClick={() => handleTriggerAiEvaluation(item)}
+                        disabled={evaluatingTaskId === (item.taskId || item.id)}
+                        className="btn btn-secondary"
+                        style={{
+                          fontSize: "0.78rem",
+                          padding: "0.45rem 0.75rem",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.35rem",
+                          color: "var(--accent-primary)",
+                          borderColor: "var(--accent-primary)",
+                          fontWeight: 600,
+                        }}
+                      >
+                        <Sparkles size={13} className={evaluatingTaskId === (item.taskId || item.id) ? "spin-icon" : ""} />
+                        <span>{evaluatingTaskId === (item.taskId || item.id) ? "Evaluating..." : "AI Rubric Eval"}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleOpenQueueReview(item)}
+                        className="btn btn-primary"
+                        style={{
+                          fontSize: "0.8rem",
+                          padding: "0.45rem 0.85rem",
+                          background: "var(--accent-primary)",
+                          color: "#fff",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.4rem",
+                        }}
+                      >
+                        <Award size={13} />
+                        <span>Grade &amp; Approve</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Modal Drawer for Grading in Review Queue */}
+        {selectedQueueItem && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(15, 23, 42, 0.5)",
+              backdropFilter: "blur(4px)",
+              zIndex: 999,
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
+            onClick={() => setSelectedQueueItem(null)}
+          >
+            <div
+              style={{
+                width: "100%",
+                maxWidth: "520px",
+                background: "var(--bg-surface)",
+                height: "100%",
+                overflowY: "auto",
+                padding: "2rem",
+                boxShadow: "-10px 0 30px rgba(0,0,0,0.15)",
+                display: "flex",
+                flexDirection: "column",
+                borderLeft: "1px solid var(--border-default)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-default)", paddingBottom: "1rem", marginBottom: "1rem" }}>
+                <div>
+                  <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "var(--accent-primary)", textTransform: "uppercase" }}>
+                    Faculty Review Action
+                  </span>
+                  <h3 style={{ fontSize: "1.15rem", fontWeight: 800, margin: "0.25rem 0 0", color: "var(--text-primary)" }}>
+                    {selectedQueueItem.title}
+                  </h3>
+                </div>
+                <button type="button" onClick={() => setSelectedQueueItem(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)" }}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div style={{ background: "var(--bg-canvas)", padding: "0.85rem", borderRadius: "6px", fontSize: "0.8rem", marginBottom: "1rem" }}>
+                <div><strong>Student:</strong> {selectedQueueItem.student.name} ({selectedQueueItem.student.rollNumber})</div>
+                <div style={{ marginTop: "0.25rem" }}><strong>Course:</strong> {selectedQueueItem.course.code} &bull; {selectedQueueItem.course.title}</div>
+                <div style={{ marginTop: "0.25rem" }}><strong>Deadline:</strong> {selectedQueueItem.deadlineDisplay}</div>
+              </div>
+
+              {/* AI Rubric Evaluation Assessment Panel */}
+              {aiEvaluationData && aiEvaluationData.taskId === (selectedQueueItem.taskId || selectedQueueItem.id) ? (
+                <div
+                  style={{
+                    background: "rgba(52, 72, 165, 0.05)",
+                    border: "1px solid rgba(52, 72, 165, 0.25)",
+                    borderRadius: "8px",
+                    padding: "1rem",
+                    marginBottom: "1.25rem",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                      <Sparkles size={16} color="var(--accent-primary)" />
+                      <span style={{ fontSize: "0.74rem", fontWeight: 700, color: "var(--accent-primary)", textTransform: "uppercase" }}>
+                        {aiEvaluationData.evaluation.evaluatorModel}
+                      </span>
+                    </div>
+                    <span style={{ fontSize: "1rem", fontWeight: 800, color: "var(--accent-primary)" }}>
+                      {aiEvaluationData.evaluation.totalMarksAwarded} / {aiEvaluationData.evaluation.maxPossibleMarks} ({aiEvaluationData.evaluation.percentageScore}%)
+                    </span>
+                  </div>
+
+                  <p style={{ fontSize: "0.78rem", color: "var(--text-secondary)", margin: "0 0 0.75rem", lineHeight: 1.45 }}>
+                    {aiEvaluationData.evaluation.overallFeedback}
+                  </p>
+
+                  <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "0.35rem" }}>
+                    Criterion Breakdown &amp; Evidence Quotes:
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem", maxHeight: "200px", overflowY: "auto", paddingRight: "0.2rem", marginBottom: "0.75rem" }}>
+                    {aiEvaluationData.evaluation.criteriaResults.map((crit: any, cidx: number) => (
+                      <div
+                        key={crit.criterionId || cidx}
+                        style={{
+                          background: "var(--bg-surface)",
+                          padding: "0.55rem 0.7rem",
+                          borderRadius: "6px",
+                          border: "1px solid var(--border-default)",
+                          fontSize: "0.76rem",
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
+                          <span style={{ color: "var(--text-primary)" }}>{crit.title}</span>
+                          <span style={{ color: "var(--accent-primary)" }}>{crit.awardedMarks} / {crit.maxMarks}</span>
+                        </div>
+                        <div style={{ color: "var(--text-secondary)", marginTop: "0.2rem" }}>
+                          {crit.justification}
+                        </div>
+                        {crit.evidenceQuote && (
+                          <div
+                            style={{
+                              marginTop: "0.3rem",
+                              fontSize: "0.7rem",
+                              fontStyle: "italic",
+                              color: "var(--text-muted)",
+                              borderLeft: "2px solid var(--accent-primary)",
+                              paddingLeft: "0.4rem",
+                            }}
+                          >
+                            &ldquo;{crit.evidenceQuote.slice(0, 160)}...&rdquo;
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGradingScore(String(aiEvaluationData.evaluation.totalMarksAwarded));
+                      const strengthsList = (aiEvaluationData.evaluation.strengths || []).map((s: string) => `• ${s}`).join("\n");
+                      const improvementsList = (aiEvaluationData.evaluation.areasForImprovement || []).map((a: string) => `• ${a}`).join("\n");
+                      setGradingFeedback(
+                        `${aiEvaluationData.evaluation.overallFeedback}\n\nKey Strengths:\n${strengthsList}\n\nAreas for Improvement:\n${improvementsList}`
+                      );
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "0.45rem",
+                      borderRadius: "6px",
+                      background: "rgba(52, 72, 165, 0.1)",
+                      border: "1px solid var(--accent-primary)",
+                      color: "var(--accent-primary)",
+                      fontSize: "0.76rem",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.4rem",
+                    }}
+                  >
+                    <CheckSquare size={13} />
+                    <span>Apply AI Suggested Marks &amp; Notes to Form</span>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleTriggerAiEvaluation(selectedQueueItem)}
+                  disabled={evaluatingTaskId === (selectedQueueItem.taskId || selectedQueueItem.id)}
+                  style={{
+                    width: "100%",
+                    marginBottom: "1rem",
+                    padding: "0.6rem",
+                    borderRadius: "6px",
+                    border: "1px dashed var(--accent-primary)",
+                    background: "rgba(52, 72, 165, 0.04)",
+                    color: "var(--accent-primary)",
+                    fontWeight: 700,
+                    fontSize: "0.82rem",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.5rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  <Sparkles size={14} className={evaluatingTaskId === (selectedQueueItem.taskId || selectedQueueItem.id) ? "spin-icon" : ""} />
+                  <span>{evaluatingTaskId === (selectedQueueItem.taskId || selectedQueueItem.id) ? "Evaluating with Gemini 3.8 Flash..." : "Run AI Rubric Pre-Evaluation (Gemini)"}</span>
+                </button>
+              )}
+
+              <form onSubmit={handleSaveQueueGrade} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "0.3rem" }}>
+                    Marks Awarded (out of 100)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    required
+                    value={gradingScore}
+                    onChange={(e) => setGradingScore(e.target.value)}
+                    style={{ width: "100%", padding: "0.5rem", borderRadius: "6px", border: "1px solid var(--border-default)", background: "var(--bg-canvas)", color: "var(--text-primary)", fontWeight: 700 }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "0.3rem" }}>
+                    Status Outcome
+                  </label>
+                  <select
+                    value={gradingStatus}
+                    onChange={(e) => setGradingStatus(e.target.value as any)}
+                    style={{ width: "100%", padding: "0.5rem", borderRadius: "6px", border: "1px solid var(--border-default)", background: "var(--bg-canvas)", color: "var(--text-primary)", fontWeight: 600 }}
+                  >
+                    <option value="COMPLETED">Approve &amp; Mark Completed (100% score recorded)</option>
+                    <option value="IN_PROGRESS">Return for Revision (75% progress recorded)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--text-muted)", marginBottom: "0.3rem" }}>
+                    Faculty Evaluation Notes &amp; Rubric Feedback
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={gradingFeedback}
+                    onChange={(e) => setGradingFeedback(e.target.value)}
+                    placeholder="Enter rubric criteria breakdown and evaluation feedback..."
+                    style={{ width: "100%", padding: "0.5rem", borderRadius: "6px", border: "1px solid var(--border-default)", background: "var(--bg-canvas)", color: "var(--text-primary)", fontSize: "0.82rem" }}
+                  />
+                </div>
+
+                {reviewSuccessMsg && (
+                  <div style={{ padding: "0.5rem 0.75rem", borderRadius: "6px", background: "rgba(22, 163, 74, 0.12)", color: "#16a34a", fontSize: "0.8rem", fontWeight: 600 }}>
+                    {reviewSuccessMsg}
+                  </div>
+                )}
+
+                <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
+                  <button type="button" onClick={() => setSelectedQueueItem(null)} className="btn btn-secondary" style={{ flex: 1 }}>
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submittingGrade}
+                    className="btn btn-primary"
+                    style={{ flex: 2, background: "var(--accent-primary)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem" }}
+                  >
+                    {submittingGrade ? <RefreshCw size={13} className="spin-icon" /> : <Send size={13} />}
+                    <span>{submittingGrade ? "Saving..." : "Commit Grade"}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* ============================================================ */}
         {/* TAB 1: 15 LIVE DEMONSTRATION CASES */}
@@ -422,7 +1008,7 @@ export default function FacultyReviewPage() {
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.5rem" }}>
-                    <span style={{ background: "#3b82f6", color: "#fff", width: "20px", height: "20px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 700 }}>
+                    <span style={{ background: "#3448A5", color: "#fff", width: "20px", height: "20px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 700 }}>
                       1
                     </span>
                     <span style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.05em", color: "var(--text-primary)" }}>
@@ -476,7 +1062,7 @@ export default function FacultyReviewPage() {
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.5rem" }}>
-                    <span style={{ background: "#8b5cf6", color: "#fff", width: "20px", height: "20px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 700 }}>
+                    <span style={{ background: "#3448A5", color: "#fff", width: "20px", height: "20px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 700 }}>
                       2
                     </span>
                     <span style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.05em", color: "var(--text-primary)" }}>
@@ -504,7 +1090,7 @@ export default function FacultyReviewPage() {
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.5rem" }}>
-                    <span style={{ background: "#10b981", color: "#fff", width: "20px", height: "20px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 700 }}>
+                    <span style={{ background: "#3448A5", color: "#fff", width: "20px", height: "20px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 700 }}>
                       3
                     </span>
                     <span style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.05em", color: "var(--text-primary)" }}>
@@ -545,7 +1131,7 @@ export default function FacultyReviewPage() {
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.5rem" }}>
-                    <span style={{ background: "#f59e0b", color: "#fff", width: "20px", height: "20px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 700 }}>
+                    <span style={{ background: "#3448A5", color: "#fff", width: "20px", height: "20px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 700 }}>
                       4
                     </span>
                     <span style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.05em", color: "var(--text-primary)" }}>
@@ -556,8 +1142,8 @@ export default function FacultyReviewPage() {
                     style={{
                       fontSize: "0.84rem",
                       color: "var(--text-primary)",
-                      background: "rgba(245, 158, 11, 0.08)",
-                      borderLeft: "3px solid #f59e0b",
+                      background: "rgba(184, 138, 69, 0.08)",
+                      borderLeft: "3px solid #B88A45",
                       padding: "0.6rem 0.8rem",
                       borderRadius: "0 6px 6px 0",
                     }}
@@ -576,7 +1162,7 @@ export default function FacultyReviewPage() {
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.5rem" }}>
-                    <span style={{ background: "#6366f1", color: "#fff", width: "20px", height: "20px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 700 }}>
+                    <span style={{ background: "#3448A5", color: "#fff", width: "20px", height: "20px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 700 }}>
                       5
                     </span>
                     <span style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.05em", color: "var(--text-primary)" }}>
@@ -605,7 +1191,7 @@ export default function FacultyReviewPage() {
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.5rem" }}>
-                    <span style={{ background: "#ec4899", color: "#fff", width: "20px", height: "20px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 700 }}>
+                    <span style={{ background: "#3448A5", color: "#fff", width: "20px", height: "20px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 700 }}>
                       6
                     </span>
                     <span style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.05em", color: "var(--text-primary)" }}>

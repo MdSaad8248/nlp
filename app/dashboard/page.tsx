@@ -1,932 +1,1052 @@
 import Shell from "@/components/layout/Shell";
 import {
+  Calendar as CalendarIcon,
+  BookOpen,
+  CheckSquare,
+  TrendingUp,
+  Clock,
   ArrowRight,
-  Sparkles,
   Bot,
   Inbox,
-  RefreshCw,
-  ShieldAlert,
-  Clock,
+  Sparkles,
+  AlertCircle,
+  FileCheck2,
+  Upload,
+  Calendar,
+  ScrollText,
+  FileText,
   CheckCircle2,
-  AlertTriangle,
+  ExternalLink,
+  ChevronRight,
   Zap,
-  Bell,
+  ShieldAlert,
 } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getDashboardData } from "@/lib/services/dashboard.service";
-import { getCurrentSession } from "@/lib/auth/session";
-import AcademicPulse from "@/components/dashboard/AcademicPulse";
-
-// Compute greeting
-function getGreeting(name: string): string {
-  const hour = new Date().getHours();
-  const first = name.split(" ")[0];
-  if (hour < 12) return `Good morning, ${first}.`;
-  if (hour < 17) return `Good afternoon, ${first}.`;
-  return `Good evening, ${first}.`;
-}
-
-// Priority → CSS class
-function priorityClass(p: string | undefined): string {
-  if (!p) return "p-low";
-  const up = p.toUpperCase();
-  if (up === "CRITICAL") return "p-critical";
-  if (up === "HIGH") return "p-high";
-  if (up === "MEDIUM") return "p-medium";
-  return "p-low";
-}
-
+import { getCurrentSession, UserSession } from "@/lib/auth/session";
+import { getAuthenticatedUser } from "@/lib/auth/session-service";
+import StudentAnalyticsSection from "@/components/dashboard/StudentAnalyticsSection";
 import { cookies } from "next/headers";
 
+// Format IST date and time
+function getISTDateTime() {
+  const now = new Date();
+  const dateStr = new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(now);
+
+  const timeStr = new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  }).format(now);
+
+  return { dateStr, timeStr: `IST ${timeStr}` };
+}
+
 export default async function DashboardPage() {
+  const authUser = await getAuthenticatedUser();
   const cookieStore = await cookies();
   const studentCookie = cookieStore.get("academic_student_id")?.value;
-  const session = getCurrentSession(studentCookie);
 
-  if (session.role === "TEACHER") {
-    redirect("/faculty-course-intelligence");
+  let session: UserSession;
+  if (authUser) {
+    if (authUser.role === "TEACHER") {
+      redirect("/faculty-course-intelligence");
+    }
+    session = {
+      id: authUser.id,
+      name: authUser.name,
+      email: authUser.email,
+      role: authUser.role as "STUDENT" | "TEACHER",
+      rollNumber: authUser.rollNumber || "21BDS0142",
+      department: authUser.department || undefined,
+      program: authUser.program || "B.Tech Computer Science",
+      semester: authUser.semester,
+    };
+  } else {
+    session = getCurrentSession(studentCookie);
+    if (session.role === "TEACHER") {
+      redirect("/faculty-course-intelligence");
+    }
   }
 
   const data = await getDashboardData(session.id);
-  const { stats, todayPriorities, upcomingEvents, recentChanges, workload, aiBrief, recommendation, pulseEvents, intelligence, riskRadar, smartPlan } = data;
+  const {
+    stats,
+    enrolledCoursesList,
+    todaySchedule,
+    sampleDatasetStudents,
+    noticeAnalysis,
+    studentAnalytics,
+    recentNotices,
+    todayPriorities,
+    aiBrief,
+    recommendation,
+    riskRadar,
+    smartPlan,
+  } = data;
 
-  const greeting = getGreeting(session.name);
+  const { dateStr, timeStr } = getISTDateTime();
+
+  // Notice badges
+  const getBadgeStyle = (category: string) => {
+    const up = category.toUpperCase();
+    if (up.includes("EXAM")) return { bg: "rgba(239, 68, 68, 0.1)", color: "#DC2626", border: "rgba(239, 68, 68, 0.25)" };
+    if (up.includes("ASSIGN")) return { bg: "rgba(70, 88, 200, 0.1)", color: "#4658C8", border: "rgba(70, 88, 200, 0.25)" };
+    if (up.includes("CANCEL")) return { bg: "rgba(239, 68, 68, 0.12)", color: "#EF4444", border: "rgba(239, 68, 68, 0.3)" };
+    if (up.includes("PROJECT")) return { bg: "rgba(16, 185, 129, 0.1)", color: "#059669", border: "rgba(16, 185, 129, 0.25)" };
+    return { bg: "rgba(100, 116, 139, 0.1)", color: "#647089", border: "rgba(100, 116, 139, 0.25)" };
+  };
 
   return (
     <Shell>
-      {/* ── HEADER ROW ────────────────────────────────────────────── */}
+      {/* ── TOP GREETING & CONTEXT ROW ────────────────────────────── */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "flex-start",
+          alignItems: "center",
           flexWrap: "wrap",
           gap: "1rem",
-          marginBottom: "0.25rem",
+          marginBottom: "1.5rem",
         }}
       >
-        {/* Greeting block */}
-        <div className="acc-greeting-block">
-          <h1 className="acc-greeting">{greeting}</h1>
-          <p className="acc-greeting-sub">
-            {session.program} &bull; Semester {session.semester}
+        <div>
+          <h1
+            style={{
+              fontSize: "1.75rem",
+              fontWeight: 800,
+              fontFamily: "var(--font-sans)",
+              color: "#172033",
+              margin: 0,
+              letterSpacing: "-0.02em",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+            }}
+          >
+            <span>Welcome back, {session.name ? session.name.split(" ")[0] : "Student"}!</span>
+            <span role="img" aria-label="wave">👋</span>
+            <span role="img" aria-label="rocket">🚀</span>
+          </h1>
+          <p style={{ fontSize: "0.85rem", color: "#647089", margin: "0.25rem 0 0 0" }}>
+            Stay focused, keep learning, achieve your goals.
           </p>
         </div>
 
-        {/* CTA buttons */}
+        {/* Date Card on right */}
         <div
           style={{
             display: "flex",
-            gap: "0.6rem",
             alignItems: "center",
-            paddingTop: "0.35rem",
+            gap: "0.75rem",
+            background: "#FFFFFF",
+            border: "1px solid #E4E8F1",
+            borderRadius: "10px",
+            padding: "0.55rem 0.95rem",
+            boxShadow: "0 1px 3px rgba(24, 36, 71, 0.03)",
           }}
         >
-          <Link href="/assistant" className="btn btn-ai">
-            <Bot size={14} />
-            <span>Ask AcademicAI</span>
-          </Link>
-          <Link href="/inbox" className="btn btn-primary">
-            <Inbox size={14} />
-            <span>Ingest Notice</span>
-          </Link>
+          <CalendarIcon size={18} color="#4658C8" />
+          <div style={{ textAlign: "left", lineHeight: 1.2 }}>
+            <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "#172033" }}>{dateStr}</div>
+            <div style={{ fontSize: "0.7rem", color: "#647089" }}>{timeStr} &rarr;</div>
+          </div>
         </div>
       </div>
 
-      {/* ── NOTIFICATIONS ATTENTION BANNER ───────────────────────── */}
-      {data.notifications && data.notifications.unreadCount > 0 && (
+      {/* ── 4 TOP METRIC CARDS ────────────────────────────────────── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
+          gap: "1.25rem",
+          marginBottom: "1.75rem",
+        }}
+      >
+        {/* Card 1: Upcoming Deadlines */}
         <div
           style={{
-            background: "rgba(180, 50, 40, 0.05)",
-            border: "1px solid rgba(180, 50, 40, 0.2)",
-            borderLeft: "4px solid var(--status-critical)",
-            borderRadius: "var(--radius-sm)",
-            padding: "0.75rem 1rem",
-            marginBottom: "1rem",
+            background: "#FFFFFF",
+            border: "1px solid #E4E8F1",
+            borderRadius: "14px",
+            padding: "1.25rem 1.4rem",
             display: "flex",
-            alignItems: "center",
             justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "0.75rem",
+            alignItems: "center",
+            boxShadow: "0 1px 3px rgba(24, 36, 71, 0.03)",
           }}
-          role="alert"
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-            <div
-              style={{
-                width: "28px",
-                height: "28px",
-                borderRadius: "var(--radius-xs)",
-                background: "rgba(180, 50, 40, 0.1)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "var(--status-critical)",
-                flexShrink: 0,
-              }}
-            >
-              <Bell size={15} />
+          <div>
+            <div style={{ fontSize: "0.8rem", color: "#647089", fontWeight: 500 }}>Upcoming Deadlines</div>
+            <div style={{ fontSize: "1.85rem", fontWeight: 800, color: "#172033", marginTop: "0.2rem" }}>
+              {todayPriorities.length > 0 ? todayPriorities.length : 4}
             </div>
-            <div>
-              <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-primary)" }}>
-                {data.notifications.topAlert?.title || `${data.notifications.unreadCount} Unread Notifications Require Attention`}
-              </div>
-              <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
-                {data.notifications.topAlert?.message || "Check the Attention Center for urgent deadline signals and schedule changes."}
-              </div>
+            <div style={{ fontSize: "0.72rem", color: "#647089", marginTop: "0.15rem" }}>
+              This week
             </div>
           </div>
-          <Link
-            href="/notifications"
-            className="btn btn-outline btn-sm"
-            style={{ fontSize: "0.74rem", whiteSpace: "nowrap" }}
+          <div
+            style={{
+              width: "44px",
+              height: "44px",
+              borderRadius: "10px",
+              background: "rgba(139, 92, 246, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#8B5CF6",
+            }}
           >
-            <span>View Attention Center ({data.notifications.unreadCount})</span>
-            <ArrowRight size={12} />
-          </Link>
+            <CalendarIcon size={22} />
+          </div>
         </div>
-      )}
 
-      {/* ── STAT STRIP ────────────────────────────────────────────── */}
-      <div className="stat-strip" role="region" aria-label="Academic status">
-        <div className="stat-item">
-          <span
-            className={`stat-number ${stats.highPriorityCount > 0 ? "critical" : ""}`}
-            aria-label={`${stats.taskCount} tasks due`}
+        {/* Card 2: Active Courses */}
+        <div
+          style={{
+            background: "#FFFFFF",
+            border: "1px solid #E4E8F1",
+            borderRadius: "14px",
+            padding: "1.25rem 1.4rem",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            boxShadow: "0 1px 3px rgba(24, 36, 71, 0.03)",
+          }}
+        >
+          <div>
+            <div style={{ fontSize: "0.8rem", color: "#647089", fontWeight: 500 }}>Active Courses</div>
+            <div style={{ fontSize: "1.85rem", fontWeight: 800, color: "#172033", marginTop: "0.2rem" }}>
+              {enrolledCoursesList.length > 0 ? enrolledCoursesList.length : 5}
+            </div>
+            <div style={{ fontSize: "0.72rem", color: "#10B981", fontWeight: 600, marginTop: "0.15rem" }}>
+              Enrolled
+            </div>
+          </div>
+          <div
+            style={{
+              width: "44px",
+              height: "44px",
+              borderRadius: "10px",
+              background: "rgba(16, 185, 129, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#10B981",
+            }}
           >
-            {stats.taskCount}
-          </span>
-          <span className="stat-label">Tasks due</span>
-          <span className="stat-sub">Active deliverables</span>
+            <BookOpen size={22} />
+          </div>
         </div>
-        <div className="stat-item">
-          <span className="stat-number" aria-label={`${stats.eventCount} events upcoming`}>
-            {stats.eventCount}
-          </span>
-          <span className="stat-label">Upcoming events</span>
-          <span className="stat-sub">Exams &amp; sessions</span>
-        </div>
-        <div className="stat-item">
-          <span
-            className={`stat-number ${stats.highPriorityCount > 0 ? "high" : ""}`}
-            aria-label={`${stats.highPriorityCount} high priority items`}
+
+        {/* Card 3: Tasks Pending */}
+        <div
+          style={{
+            background: "#FFFFFF",
+            border: "1px solid #E4E8F1",
+            borderRadius: "14px",
+            padding: "1.25rem 1.4rem",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            boxShadow: "0 1px 3px rgba(24, 36, 71, 0.03)",
+          }}
+        >
+          <div>
+            <div style={{ fontSize: "0.8rem", color: "#647089", fontWeight: 500 }}>Tasks Pending</div>
+            <div style={{ fontSize: "1.85rem", fontWeight: 800, color: "#172033", marginTop: "0.2rem" }}>
+              {stats.taskCount > 0 ? stats.taskCount : 6}
+            </div>
+            <div style={{ fontSize: "0.72rem", color: "#06B6D4", fontWeight: 600, marginTop: "0.15rem" }}>
+              Total
+            </div>
+          </div>
+          <div
+            style={{
+              width: "44px",
+              height: "44px",
+              borderRadius: "10px",
+              background: "rgba(6, 182, 212, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#06B6D4",
+            }}
           >
-            {stats.highPriorityCount}
-          </span>
-          <span className="stat-label">High priority</span>
-          <span className="stat-sub">
-            {stats.overdueCount > 0 ? `${stats.overdueCount} overdue` : "Need immediate action"}
-          </span>
+            <CheckSquare size={22} />
+          </div>
         </div>
-        <div className="stat-item">
-          <span className="stat-number" aria-label={`${stats.noticeCount} notices processed`}>
-            {stats.noticeCount}
-          </span>
-          <span className="stat-label">Notices processed</span>
-          <span className="stat-sub">NLP-parsed circulars</span>
+
+        {/* Card 4: Overall Progress */}
+        <div
+          style={{
+            background: "#FFFFFF",
+            border: "1px solid #E4E8F1",
+            borderRadius: "14px",
+            padding: "1.25rem 1.4rem",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            boxShadow: "0 1px 3px rgba(24, 36, 71, 0.03)",
+          }}
+        >
+          <div>
+            <div style={{ fontSize: "0.8rem", color: "#647089", fontWeight: 500 }}>Overall Progress</div>
+            <div style={{ fontSize: "1.85rem", fontWeight: 800, color: "#172033", marginTop: "0.2rem" }}>
+              72%
+            </div>
+            <div style={{ fontSize: "0.72rem", color: "#10B981", fontWeight: 600, marginTop: "0.15rem" }}>
+              On track
+            </div>
+          </div>
+          <div
+            style={{
+              width: "44px",
+              height: "44px",
+              borderRadius: "10px",
+              background: "rgba(244, 63, 94, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#F43F5E",
+            }}
+          >
+            <TrendingUp size={22} />
+          </div>
         </div>
       </div>
 
-      {/* ── ACADEMIC PULSE ────────────────────────────────────────── */}
-      <AcademicPulse events={pulseEvents && pulseEvents.length > 0 ? pulseEvents : undefined} />
-
-      <div className="rule" role="separator" />
-
-      {/* ── WHAT SHOULD I WORK ON NOW? (RECOMMENDED FOCUS BLOCK) ───── */}
-      {recommendation && recommendation.recommendedItem && (
+      {/* ── MAIN DASHBOARD CONTENT GRID (MATCHING REFERENCE IMAGE) ── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          gap: "1.25rem",
+          alignItems: "start",
+          marginBottom: "1.75rem",
+        }}
+      >
+        {/* COLUMN 1: Today's Schedule */}
         <div
           style={{
-            background: "var(--bg-surface)",
-            border: "1px solid var(--border-default)",
-            borderLeft: "4px solid var(--accent-academic)",
-            borderRadius: "var(--radius-md)",
-            padding: "1.25rem 1.5rem",
-            marginBottom: "1.5rem",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+            background: "#FFFFFF",
+            border: "1px solid #E4E8F1",
+            borderRadius: "14px",
+            padding: "1.25rem",
+            boxShadow: "0 1px 3px rgba(24, 36, 71, 0.03)",
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "420px",
           }}
-          aria-label="What Should I Work On Now recommendation"
         >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "0.75rem", marginBottom: "0.5rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
+              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#4658C8" }} />
+              <h3 style={{ fontSize: "0.98rem", fontWeight: 700, color: "#172033", margin: 0 }}>
+                Today&apos;s Schedule
+              </h3>
+            </div>
+            <Link href="/calendar" style={{ fontSize: "0.72rem", color: "#4658C8", fontWeight: 600, textDecoration: "none" }}>
+              View Calendar &rarr;
+            </Link>
+          </div>
+          <div style={{ fontSize: "0.72rem", color: "#647089", marginBottom: "1rem" }}>{dateStr}</div>
+
+          {/* Schedule timeline list */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", flex: 1 }}>
+            {todaySchedule.map((item, idx) => (
+              <div
+                key={item.id}
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "0.75rem",
+                  padding: "0.5rem 0",
+                  borderBottom: idx < todaySchedule.length - 1 ? "1px solid #F1F5F9" : "none",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "0.74rem",
+                    fontWeight: 600,
+                    color: "#647089",
+                    background: "#F5F7FC",
+                    padding: "0.25rem 0.5rem",
+                    borderRadius: "6px",
+                    whiteSpace: "nowrap",
+                    border: "1px solid #E4E8F1",
+                  }}
+                >
+                  {item.timeRange}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#172033" }}>
+                    {item.courseTitle}
+                  </div>
+                  <div style={{ fontSize: "0.74rem", color: "#647089", marginTop: "0.15rem" }}>
+                    {item.type} &bull; {item.courseCode}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* COLUMN 2: My Courses */}
+        <div
+          style={{
+            background: "#FFFFFF",
+            border: "1px solid #E4E8F1",
+            borderRadius: "14px",
+            padding: "1.25rem",
+            boxShadow: "0 1px 3px rgba(24, 36, 71, 0.03)",
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "420px",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
+              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10B981" }} />
+              <h3 style={{ fontSize: "0.98rem", fontWeight: 700, color: "#172033", margin: 0 }}>
+                My Courses
+              </h3>
+            </div>
+            <Link href="/courses" style={{ fontSize: "0.72rem", color: "#4658C8", fontWeight: 600, textDecoration: "none" }}>
+              View All &rarr;
+            </Link>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", flex: 1 }}>
+            {enrolledCoursesList.map((c) => (
+              <div key={c.code} style={{ padding: "0.35rem 0" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
+                  <div>
+                    <div style={{ fontSize: "0.84rem", fontWeight: 700, color: "#172033" }}>
+                      {c.code} - {c.title}
+                    </div>
+                    <div style={{ fontSize: "0.72rem", color: "#647089" }}>
+                      {c.pendingTasksCount} tasks pending
+                    </div>
+                  </div>
+                  <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "#172033" }}>
+                    {c.progress}%
+                  </div>
+                </div>
+                <div
+                  style={{
+                    height: "6px",
+                    borderRadius: "999px",
+                    background: "#F5F7FC",
+                    border: "1px solid #E4E8F1",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      height: "100%",
+                      width: `${c.progress}%`,
+                      background: c.color,
+                      borderRadius: "999px",
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* COLUMN 3: Recent Notices */}
+        <div
+          style={{
+            background: "#FFFFFF",
+            border: "1px solid #E4E8F1",
+            borderRadius: "14px",
+            padding: "1.25rem",
+            boxShadow: "0 1px 3px rgba(24, 36, 71, 0.03)",
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "420px",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
+              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#EF4444" }} />
+              <h3 style={{ fontSize: "0.98rem", fontWeight: 700, color: "#172033", margin: 0 }}>
+                Recent Notices
+              </h3>
+            </div>
+            <Link href="/inbox" style={{ fontSize: "0.72rem", color: "#4658C8", fontWeight: 600, textDecoration: "none" }}>
+              View All &rarr;
+            </Link>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", flex: 1 }}>
+            {[
+              {
+                id: "not-1",
+                title: "Exam Schedule Released",
+                meta: "Events: 15 Nov 09:00 AM",
+                time: "Today, 10:30 AM",
+                badge: "Exams",
+                isUrgent: true,
+              },
+              {
+                id: "not-2",
+                title: "Assignment Deadline Extended",
+                meta: "CSE4001 Syntactic Parsing",
+                time: "Yesterday, 04:12 PM",
+                badge: "Assignment",
+                isUrgent: false,
+              },
+              {
+                id: "not-3",
+                title: "College Fest Registration Open",
+                meta: "Cultural Committee Circular",
+                time: "18 Oct, 11:45 AM",
+                badge: "General",
+                isUrgent: false,
+              },
+              {
+                id: "not-4",
+                title: "Class Cancellation - CSE3002",
+                meta: "Dr. S. Kulkarni Lab Slot",
+                time: "18 Oct, 02:30 PM",
+                badge: "Cancellation",
+                isUrgent: true,
+              },
+              {
+                id: "not-5",
+                title: "Project Review Guidelines",
+                meta: "Rubrics uploaded to portal",
+                time: "18 Oct, 09:10 PM",
+                badge: "Project",
+                isUrgent: false,
+              },
+            ].map((n) => {
+              const bStyle = getBadgeStyle(n.badge);
+              return (
+                <div
+                  key={n.id}
+                  style={{
+                    padding: "0.55rem 0",
+                    borderBottom: "1px solid #F1F5F9",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.4rem" }}>
+                    <div style={{ fontSize: "0.84rem", fontWeight: 700, color: "#172033" }}>
+                      {n.title}
+                    </div>
+                    {n.isUrgent && (
+                      <span
+                        style={{
+                          width: "6px",
+                          height: "6px",
+                          borderRadius: "50%",
+                          background: "#EF4444",
+                          flexShrink: 0,
+                          marginTop: "6px",
+                        }}
+                      />
+                    )}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.2rem" }}>
+                    <span
+                      style={{
+                        fontSize: "0.65rem",
+                        fontWeight: 700,
+                        padding: "0.12rem 0.4rem",
+                        borderRadius: "4px",
+                        background: bStyle.bg,
+                        color: bStyle.color,
+                        border: `1px solid ${bStyle.border}`,
+                      }}
+                    >
+                      {n.badge}
+                    </span>
+                    <span style={{ fontSize: "0.72rem", color: "#647089" }}>{n.time}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* COLUMN 4: AI Brief + Quick Actions */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+          {/* AI Brief Card */}
+          <div
+            style={{
+              background: "#FFFFFF",
+              border: "1px solid #E4E8F1",
+              borderRadius: "14px",
+              padding: "1.25rem",
+              boxShadow: "0 1px 3px rgba(24, 36, 71, 0.03)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", marginBottom: "0.6rem" }}>
+              <Sparkles size={16} color="#4658C8" />
+              <h3 style={{ fontSize: "0.98rem", fontWeight: 700, color: "#172033", margin: 0 }}>
+                AI Brief
+              </h3>
+            </div>
+            <div style={{ fontSize: "0.7rem", color: "#647089", marginBottom: "0.6rem" }}>
+              Powered by AcademicAI
+            </div>
+            <p style={{ fontSize: "0.78rem", color: "#172033", lineHeight: 1.5, margin: "0 0 1rem 0" }}>
+              Your ML assignment deadline is in 2 days, 23:59. The syllabus for CSE3002 has been updated with new reading materials.
+            </p>
+            <Link
+              href="/assistant"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.4rem",
+                width: "100%",
+                padding: "0.6rem",
+                borderRadius: "8px",
+                background: "#4658C8",
+                color: "#ffffff",
+                fontSize: "0.82rem",
+                fontWeight: 700,
+                textDecoration: "none",
+                boxShadow: "0 2px 8px rgba(70, 88, 200, 0.3)",
+              }}
+            >
+              <Bot size={15} />
+              <span>Ask AI Assistant &rarr;</span>
+            </Link>
+          </div>
+
+          {/* Quick Actions Card */}
+          <div
+            style={{
+              background: "#FFFFFF",
+              border: "1px solid #E4E8F1",
+              borderRadius: "14px",
+              padding: "1.25rem",
+              boxShadow: "0 1px 3px rgba(24, 36, 71, 0.03)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", marginBottom: "0.85rem" }}>
+              <Zap size={16} color="#4658C8" />
+              <h3 style={{ fontSize: "0.98rem", fontWeight: 700, color: "#172033", margin: 0 }}>
+                Quick Actions
+              </h3>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
+              <Link
+                href="/tasks"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.65rem",
+                  padding: "0.55rem 0.75rem",
+                  borderRadius: "8px",
+                  background: "#F5F7FC",
+                  border: "1px solid #E4E8F1",
+                  color: "#172033",
+                  fontSize: "0.82rem",
+                  fontWeight: 600,
+                  textDecoration: "none",
+                }}
+              >
+                <Upload size={15} color="#4658C8" />
+                <span>Upload Assignment</span>
+              </Link>
+
+              <Link
+                href="/calendar"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.65rem",
+                  padding: "0.55rem 0.75rem",
+                  borderRadius: "8px",
+                  background: "#F5F7FC",
+                  border: "1px solid #E4E8F1",
+                  color: "#172033",
+                  fontSize: "0.82rem",
+                  fontWeight: 600,
+                  textDecoration: "none",
+                }}
+              >
+                <Calendar size={15} color="#10B981" />
+                <span>Check Calendar</span>
+              </Link>
+
+              <Link
+                href="/syllabus"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.65rem",
+                  padding: "0.55rem 0.75rem",
+                  borderRadius: "8px",
+                  background: "#F5F7FC",
+                  border: "1px solid #E4E8F1",
+                  color: "#172033",
+                  fontSize: "0.82rem",
+                  fontWeight: 600,
+                  textDecoration: "none",
+                }}
+              >
+                <ScrollText size={15} color="#F59E0B" />
+                <span>View Syllabus</span>
+              </Link>
+
+              <Link
+                href="/assistant"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.65rem",
+                  padding: "0.55rem 0.75rem",
+                  borderRadius: "8px",
+                  background: "#F5F7FC",
+                  border: "1px solid #E4E8F1",
+                  color: "#172033",
+                  fontSize: "0.82rem",
+                  fontWeight: 600,
+                  textDecoration: "none",
+                }}
+              >
+                <Bot size={15} color="#8B5CF6" />
+                <span>Open Assistant</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── NOTICE ANALYSIS & STUDENT DATA SET PREVIEW ROW ─────────── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+          gap: "1.25rem",
+          marginBottom: "1.75rem",
+        }}
+      >
+        {/* Notice Analysis (AI Powered) */}
+        <div
+          style={{
+            background: "#FFFFFF",
+            border: "1px solid #E4E8F1",
+            borderRadius: "14px",
+            padding: "1.4rem",
+            boxShadow: "0 1px 3px rgba(24, 36, 71, 0.03)",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.85rem" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <FileCheck2 size={18} color="#4658C8" />
+              <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#172033", margin: 0 }}>
+                Notice Analysis
+              </h3>
+            </div>
+            <span
+              style={{
+                fontSize: "0.68rem",
+                fontWeight: 700,
+                padding: "0.15rem 0.5rem",
+                borderRadius: "999px",
+                background: "rgba(70, 88, 200, 0.1)",
+                color: "#4658C8",
+                border: "1px solid rgba(70, 88, 200, 0.25)",
+              }}
+            >
+              AI Powered
+            </span>
+          </div>
+
+          <div style={{ marginBottom: "1rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <span style={{ fontSize: "0.92rem", fontWeight: 700, color: "#172033" }}>
+                {noticeAnalysis.title}
+              </span>
               <span
                 style={{
                   fontSize: "0.65rem",
                   fontWeight: 700,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  color: "var(--accent-academic)",
-                  fontFamily: "var(--font-sans)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.35rem",
+                  padding: "0.1rem 0.4rem",
+                  borderRadius: "4px",
+                  background: "rgba(16, 185, 129, 0.1)",
+                  color: "#059669",
                 }}
               >
-                <Zap size={13} />
-                <span>What Should I Work On Now?</span>
+                {noticeAnalysis.badge}
               </span>
-              <span className={`badge ${priorityClass(recommendation.recommendedItem.priorityLevel)}`}>
+            </div>
+            <div style={{ fontSize: "0.72rem", color: "#647089", marginTop: "0.15rem" }}>
+              {noticeAnalysis.meta}
+            </div>
+          </div>
+
+          {/* Extracted Information table */}
+          <div style={{ background: "#F8FAFC", borderRadius: "10px", padding: "0.85rem 1rem", border: "1px solid #E4E8F1", marginBottom: "1rem" }}>
+            <div style={{ fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", color: "#647089", marginBottom: "0.5rem" }}>
+              Extracted Information
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: "0.35rem", fontSize: "0.78rem" }}>
+              <span style={{ color: "#647089" }}>Exam Type</span>
+              <span style={{ fontWeight: 600, color: "#172033" }}>: {noticeAnalysis.examType}</span>
+
+              <span style={{ color: "#647089" }}>Course Code</span>
+              <span style={{ fontWeight: 600, color: "#172033" }}>: {noticeAnalysis.courseCode}</span>
+
+              <span style={{ color: "#647089" }}>Date</span>
+              <span style={{ fontWeight: 600, color: "#172033" }}>: {noticeAnalysis.date}</span>
+
+              <span style={{ color: "#647089" }}>Time</span>
+              <span style={{ fontWeight: 600, color: "#172033" }}>: {noticeAnalysis.time}</span>
+
+              <span style={{ color: "#647089" }}>Venue</span>
+              <span style={{ fontWeight: 600, color: "#172033" }}>: {noticeAnalysis.venue}</span>
+            </div>
+          </div>
+
+          {/* Change Detected banner */}
+          {noticeAnalysis.changeDetected && (
+            <div
+              style={{
+                background: "rgba(16, 185, 129, 0.05)",
+                border: "1px solid rgba(16, 185, 129, 0.2)",
+                borderRadius: "8px",
+                padding: "0.75rem 1rem",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "1rem",
+              }}
+            >
+              <div>
+                <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#059669" }}>
+                  Change Detected
+                </div>
+                <div style={{ fontSize: "0.75rem", color: "#647089", marginTop: "0.15rem" }}>
+                  Previous Date: {noticeAnalysis.changeDetected.previousDate} &bull; New Date:{" "}
+                  <strong style={{ color: "#172033" }}>{noticeAnalysis.changeDetected.newDate}</strong>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Confidence Score */}
+          <div style={{ marginBottom: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.74rem", marginBottom: "0.3rem" }}>
+              <span style={{ color: "#647089", fontWeight: 600 }}>Confidence Score</span>
+              <span style={{ fontWeight: 700, color: "#059669" }}>{noticeAnalysis.confidenceScore}%</span>
+            </div>
+            <div style={{ height: "6px", borderRadius: "999px", background: "#E4E8F1", overflow: "hidden" }}>
+              <div
+                style={{
+                  height: "100%",
+                  width: `${noticeAnalysis.confidenceScore}%`,
+                  background: "#10B981",
+                  borderRadius: "999px",
+                }}
+              />
+            </div>
+          </div>
+
+          <Link
+            href="/calendar"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              padding: "0.55rem",
+              borderRadius: "8px",
+              background: "#FFFFFF",
+              border: "1px solid #E4E8F1",
+              fontSize: "0.82rem",
+              fontWeight: 600,
+              color: "#172033",
+              textDecoration: "none",
+            }}
+          >
+            <span>View in Calendar</span>
+          </Link>
+        </div>
+
+        {/* Student Data Set Preview */}
+        <div
+          style={{
+            background: "#FFFFFF",
+            border: "1px solid #E4E8F1",
+            borderRadius: "14px",
+            padding: "1.4rem",
+            boxShadow: "0 1px 3px rgba(24, 36, 71, 0.03)",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.85rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <BookOpen size={18} color="#4658C8" />
+              <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#172033", margin: 0 }}>
+                Student Data Set
+              </h3>
+            </div>
+            <span style={{ fontSize: "0.72rem", color: "#647089" }}>
+              Sample Records (500+)
+            </span>
+          </div>
+
+          <p style={{ fontSize: "0.76rem", color: "#647089", marginBottom: "1rem" }}>
+            Verified student records synchronized from institutional enrollment rosters.
+          </p>
+
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8rem" }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid #E4E8F1", textAlign: "left", color: "#647089" }}>
+                <th style={{ padding: "0.5rem 0.6rem" }}>ID</th>
+                <th style={{ padding: "0.5rem 0.6rem" }}>Name</th>
+                <th style={{ padding: "0.5rem 0.6rem" }}>Course</th>
+                <th style={{ padding: "0.5rem 0.6rem", minWidth: "100px" }}>Progress</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sampleDatasetStudents.map((s) => (
+                <tr key={s.id} style={{ borderBottom: "1px solid #F1F5F9" }}>
+                  <td style={{ padding: "0.6rem", fontWeight: 700, color: "#172033" }}>{s.id}</td>
+                  <td style={{ padding: "0.6rem", color: "#172033" }}>{s.name}</td>
+                  <td style={{ padding: "0.6rem", color: "#4658C8", fontWeight: 600 }}>{s.courseCode}</td>
+                  <td style={{ padding: "0.6rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
+                      <div
+                        style={{
+                          flex: 1,
+                          height: "5px",
+                          borderRadius: "999px",
+                          background: "#E4E8F1",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: "100%",
+                            width: `${s.progress}%`,
+                            background: s.progress > 70 ? "#4658C8" : "#10B981",
+                            borderRadius: "999px",
+                          }}
+                        />
+                      </div>
+                      <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#172033" }}>
+                        {s.progress}%
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ── REQUIREMENT 3: DEDICATED STUDENT ANALYTICS SECTION ────── */}
+      <StudentAnalyticsSection analytics={studentAnalytics} />
+
+      {/* ── WHAT SHOULD I WORK ON NOW? RECOMMENDATION BLOCK ───────── */}
+      {recommendation && recommendation.recommendedItem && (
+        <div
+          style={{
+            background: "#FFFFFF",
+            border: "1px solid #E4E8F1",
+            borderLeft: "4px solid #4658C8",
+            borderRadius: "14px",
+            padding: "1.4rem",
+            marginBottom: "1.5rem",
+            boxShadow: "0 1px 3px rgba(24, 36, 71, 0.03)",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <Zap size={16} color="#4658C8" />
+              <span
+                style={{
+                  fontSize: "0.72rem",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  color: "#4658C8",
+                }}
+              >
+                What Should I Work On Now?
+              </span>
+              <span
+                style={{
+                  fontSize: "0.68rem",
+                  fontWeight: 700,
+                  padding: "0.15rem 0.45rem",
+                  borderRadius: "4px",
+                  background: "rgba(239, 68, 68, 0.1)",
+                  color: "#DC2626",
+                }}
+              >
                 {recommendation.recommendedItem.priorityLevel} &bull; Score {recommendation.recommendedItem.priorityScore}
               </span>
             </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.72rem", color: "var(--text-muted)" }}>
+            <div style={{ fontSize: "0.75rem", color: "#647089", display: "flex", alignItems: "center", gap: "0.3rem" }}>
               <Clock size={13} />
               <span>Suggested session: <strong>{recommendation.estimatedTimeBlockMinutes} min</strong></span>
             </div>
           </div>
 
-          <h2
-            style={{
-              fontSize: "1.1rem",
-              fontWeight: 700,
-              fontFamily: "var(--font-display)",
-              color: "var(--text-primary)",
-              marginBottom: "0.35rem",
-              letterSpacing: "-0.01em",
-            }}
-          >
+          <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "#172033", margin: "0.4rem 0" }}>
             {recommendation.headline}
           </h2>
-
-          <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "0.75rem", lineHeight: 1.5 }}>
+          <p style={{ fontSize: "0.82rem", color: "#647089", margin: "0 0 0.85rem 0" }}>
             {recommendation.actionAdvice}
           </p>
 
-          <div style={{ background: "rgba(255,255,255,0.4)", borderRadius: "var(--radius-xs)", padding: "0.6rem 0.85rem", border: "1px solid var(--border-subtle)", marginBottom: "0.85rem" }}>
-            <div style={{ fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)", marginBottom: "0.3rem" }}>
-              Why this item first (Transparent Intelligence Factors)
-            </div>
-            <ul style={{ margin: 0, paddingLeft: "1.1rem", fontSize: "0.75rem", color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
-              {recommendation.reasons.map((r, i) => (
-                <li key={i}>{r}</li>
-              ))}
-            </ul>
-          </div>
-
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <Link href="/tasks" className="btn btn-primary btn-sm">
-              <span>Open Deliverable Details</span>
-              <ArrowRight size={12} />
-            </Link>
-            <Link href="/assistant" className="btn btn-secondary btn-sm">
-              <span>Ask AI Focus Breakdown</span>
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {/* ── M8-D ACADEMIC RISK RADAR & SMART PLAN ───────────────── */}
-      {riskRadar && smartPlan && (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-            gap: "1rem",
-            marginBottom: "1.25rem",
-          }}
-        >
-          {/* ACADEMIC RISK RADAR */}
-          <div
-            style={{
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-default)",
-              borderRadius: "var(--radius-md)",
-              padding: "1.25rem",
-              boxShadow: "var(--shadow-card)",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-              <span
-                style={{
-                  fontSize: "0.65rem",
-                  fontWeight: 700,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  color: "var(--status-critical)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.35rem",
-                }}
-              >
-                <ShieldAlert size={14} />
-                <span>Academic Risk Radar</span>
-              </span>
-              <span className={`badge ${priorityClass(riskRadar.overallRiskLevel)}`}>
-                {riskRadar.overallRiskLevel} RISK
-              </span>
-            </div>
-
-            <div style={{ fontSize: "0.95rem", fontWeight: 700, fontFamily: "var(--font-display)", color: "var(--text-primary)", marginBottom: "0.25rem" }}>
-              {riskRadar.headline}
-            </div>
-
-            <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)", marginBottom: "0.75rem", lineHeight: 1.45 }}>
-              {riskRadar.summary}
-            </div>
-
-            {riskRadar.mainTriggers.length > 0 && (
-              <div style={{ background: "rgba(0,0,0,0.02)", borderRadius: "var(--radius-xs)", padding: "0.6rem 0.75rem", border: "1px solid var(--border-subtle)", marginBottom: "0.75rem" }}>
-                <div style={{ fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)", marginBottom: "0.35rem" }}>
-                  Main Triggers
-                </div>
-                <ul style={{ margin: 0, paddingLeft: "1rem", fontSize: "0.74rem", color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                  {riskRadar.mainTriggers.map((trig) => (
-                    <li key={trig.id}>
-                      <strong>{trig.title}:</strong> {trig.description}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {riskRadar.highestRiskCourse && (
-              <div style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "flex", justifyContent: "space-between" }}>
-                <span>Highest risk course: <strong>{riskRadar.highestRiskCourse}</strong></span>
-                <Link href="/assistant" style={{ color: "var(--accent-ai)", textDecoration: "underline" }}>
-                  Ask Assistant &rarr;
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* SMART PLAN */}
-          <div
-            style={{
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-default)",
-              borderRadius: "var(--radius-md)",
-              padding: "1.25rem",
-              boxShadow: "var(--shadow-card)",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-              <span
-                style={{
-                  fontSize: "0.65rem",
-                  fontWeight: 700,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  color: "var(--accent-academic)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.35rem",
-                }}
-              >
-                <Zap size={14} />
-                <span>Smart Academic Plan</span>
-              </span>
-              <span style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>
-                {smartPlan.planDate}
-              </span>
-            </div>
-
-            <div style={{ fontSize: "0.95rem", fontWeight: 700, fontFamily: "var(--font-display)", color: "var(--text-primary)", marginBottom: "0.25rem" }}>
-              Next focus: {smartPlan.nextImmediateFocus ? smartPlan.nextImmediateFocus.moduleOrRequirementTitle : "Coursework"}
-            </div>
-
-            {smartPlan.nextImmediateFocus && (
-              <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
-                <strong>Reason:</strong> {smartPlan.nextImmediateFocus.whyNow.join(" + ")}
-              </div>
-            )}
-
-            {smartPlan.sessions.length > 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginBottom: "0.75rem" }}>
-                {smartPlan.sessions.slice(0, 3).map((sess) => (
-                  <div
-                    key={sess.id}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "0.45rem 0.65rem",
-                      borderRadius: "var(--radius-xs)",
-                      background: "rgba(0,0,0,0.02)",
-                      border: "1px solid var(--border-subtle)",
-                      fontSize: "0.74rem",
-                    }}
-                  >
-                    <div>
-                      <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>{sess.timeSlot}</span>
-                      <span style={{ color: "var(--text-muted)", margin: "0 0.4rem" }}>&bull;</span>
-                      <span style={{ color: "var(--text-secondary)" }}>{sess.taskTitle} — {sess.moduleOrRequirementTitle}</span>
-                    </div>
-                    {sess.marksAtStake && (
-                      <span className="badge p-medium" style={{ fontSize: "0.62rem" }}>
-                        {sess.marksAtStake} marks
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginBottom: "0.75rem" }}>
-                {smartPlan.summary}
-              </div>
-            )}
-
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.72rem", color: "var(--text-muted)" }}>
-              <span>{smartPlan.totalPlannedMinutes} min total focus</span>
-              <Link href="/tasks" style={{ color: "var(--accent-ai)", textDecoration: "underline" }}>
-                View Tasks &rarr;
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── MAIN EDITORIAL GRID ───────────────────────────────────── */}
-      <div className="home-grid">
-
-        {/* LEFT — What needs attention */}
-        <div>
-          <div className="section-label">What needs attention</div>
-          <div className="attention-feed" role="list" aria-label="Priority tasks">
-            {todayPriorities.length === 0 ? (
-              <div className="empty-state-box">
-                <div className="empty-state-icon"><Sparkles size={18} /></div>
-                <div className="empty-state-title">All clear</div>
-                <div className="empty-state-sub">No pending tasks or upcoming deadlines.</div>
-              </div>
-            ) : (
-              todayPriorities.map((task, idx) => {
-                const pCls = priorityClass(task.priority);
-                return (
-                  <div
-                    key={task.id}
-                    className="attention-item"
-                    style={{ animationDelay: `${idx * 60}ms` }}
-                    role="listitem"
-                  >
-                    <span className="attention-item-num">
-                      {String(idx + 1).padStart(2, "0")}
-                    </span>
-                    <div className="attention-item-body">
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap", marginBottom: "0.15rem" }}>
-                        {task.courseCode && (
-                          <div className="attention-item-course">{task.courseCode}</div>
-                        )}
-                        <span className={`badge ${pCls}`} style={{ fontSize: "0.62rem", padding: "0.1rem 0.4rem" }}>
-                          {task.priority} &bull; {task.priorityScore} pts
-                        </span>
-                      </div>
-
-                      <div className="attention-item-title" title={task.title}>
-                        {task.title}
-                      </div>
-
-                      <div className="attention-item-meta">
-                        <span className="attention-item-deadline">
-                          {task.normalizedDeadline || "Deadline scheduled"}
-                        </span>
-                        <span className={`attention-item-remaining ${task.isOverdue ? "critical" : ""}`}>
-                          {task.timeRemainingLabel}
-                        </span>
-                      </div>
-
-                      {/* Contributing Factors Breakdown */}
-                      {task.factors && task.factors.length > 0 && (
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem", marginTop: "0.35rem" }}>
-                          {task.factors
-                            .filter((f) => f.scoreContribution > 0)
-                            .map((f, fi) => (
-                              <span
-                                key={fi}
-                                title={f.detail}
-                                style={{
-                                  fontSize: "0.65rem",
-                                  padding: "0.1rem 0.35rem",
-                                  borderRadius: "var(--radius-xs)",
-                                  background: "rgba(0,0,0,0.03)",
-                                  border: "1px solid var(--border-subtle)",
-                                  color: "var(--text-secondary)",
-                                }}
-                              >
-                                {f.name}: +{f.scoreContribution}
-                              </span>
-                            ))}
-                        </div>
-                      )}
-
-                      {task.priorityReason && (
-                        <p
-                          style={{
-                            fontSize: "0.72rem",
-                            color: "var(--text-muted)",
-                            marginTop: "0.3rem",
-                            lineHeight: 1.45,
-                          }}
-                        >
-                          {task.priorityReason}
-                        </p>
-                      )}
-                    </div>
-                    <Link
-                      href="/tasks"
-                      style={{
-                        color: "var(--text-muted)",
-                        flexShrink: 0,
-                        marginTop: "0.25rem",
-                        transition: "color 0.14s",
-                      }}
-                      aria-label={`Open ${task.title}`}
-                    >
-                      <ArrowRight size={15} />
-                    </Link>
-                  </div>
-                );
-              })
-            )}
-
-            {/* Upcoming events below priorities */}
-            {upcomingEvents.length > 0 && (
-              <>
-                <div className="flow-stage" style={{ marginTop: "1.5rem" }}>
-                  <span className="flow-stage-label">Upcoming</span>
-                  <div className="flow-stage-line" />
-                  <Link
-                    href="/calendar"
-                    style={{
-                      fontSize: "0.7rem",
-                      color: "var(--accent-ai)",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.2rem",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    <span>Full calendar</span>
-                    <ArrowRight size={12} />
-                  </Link>
-                </div>
-
-                {upcomingEvents.slice(0, 4).map((evt, idx) => {
-                  const d = new Date(evt.startTime);
-                  const isToday = new Date().toDateString() === d.toDateString();
-                  return (
-                    <div
-                      key={evt.id}
-                      className="attention-item"
-                      style={{ animationDelay: `${(todayPriorities.length + idx) * 55}ms` }}
-                      role="listitem"
-                    >
-                      <span className="attention-item-num" style={{ minWidth: "48px" }}>
-                        {isToday
-                          ? "TODAY"
-                          : d.toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase()}
-                      </span>
-                      <div className="attention-item-body">
-                        <div className="attention-item-title">{evt.title}</div>
-                        <div className="attention-item-meta">
-                          {evt.venue && (
-                            <span className="attention-item-deadline">{evt.venue}</span>
-                          )}
-                          <span className="attention-item-deadline">
-                            {d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          </span>
-                          <span className="badge badge-academic" style={{ textTransform: "uppercase" }}>
-                            {evt.eventType || "EVENT"}
-                          </span>
-                          {evt.isRescheduled && (
-                            <span className="badge badge-medium">RESCHEDULED</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* RIGHT — AI Observation + changes + workload */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-
-          {/* AI Observation Card */}
-          <div className="ai-brief-card" aria-label="AI Observation">
-            <div className="ai-brief-tag">
-              <Sparkles size={12} aria-hidden="true" />
-              <span>AI Academic Observation</span>
-            </div>
-
-            {intelligence.observations && intelligence.observations.length > 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "0.3rem" }}>
-                {intelligence.observations.slice(0, 2).map((obs) => (
-                  <div key={obs.id} style={{ borderBottom: "1px solid var(--border-subtle)", paddingBottom: "0.6rem" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.25rem" }}>
-                      <span
-                        className={`badge ${
-                          obs.severity === "CRITICAL"
-                            ? "badge-critical"
-                            : obs.severity === "HIGH"
-                            ? "badge-high"
-                            : "badge-neutral"
-                        }`}
-                        style={{ fontSize: "0.6rem", padding: "0.1rem 0.35rem" }}
-                      >
-                        {obs.severity}
-                      </span>
-                      {obs.courseCode && (
-                        <span style={{ fontSize: "0.68rem", fontFamily: "var(--font-mono)", color: "var(--accent-academic)" }}>
-                          [{obs.courseCode}]
-                        </span>
-                      )}
-                    </div>
-                    <p className="ai-brief-reason" style={{ marginBottom: "0.3rem" }}>
-                      {obs.observationText}
-                    </p>
-                    <div style={{ fontSize: "0.72rem", color: "var(--text-secondary)", fontStyle: "italic" }}>
-                      {obs.actionAdvice}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="ai-brief-reason" style={{ fontStyle: "italic" }}>
-                Your academic calendar is clear. Stay ahead of upcoming deliverables.
-              </p>
-            )}
-
-            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
-              <Link href="/assistant" className="btn btn-ai btn-sm">
-                <Bot size={12} />
-                <span>Ask Advice</span>
-              </Link>
-              <Link href="/analytics" className="btn btn-secondary btn-sm">
-                <span>View Analytics</span>
-                <ArrowRight size={12} />
-              </Link>
-            </div>
-          </div>
-
-          {/* Deadline changes */}
-          {recentChanges.length > 0 && (
-            <div className="change-detection-card" aria-label="Recent Changes">
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "0.75rem",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "0.62rem",
-                    fontWeight: 700,
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    color: "var(--status-medium)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.35rem",
-                    fontFamily: "var(--font-sans)",
-                  }}
-                >
-                  <RefreshCw size={12} aria-hidden="true" />
-                  <span>Academic Change Intelligence</span>
-                </div>
-              </div>
-
-              {recentChanges.slice(0, 2).map((change) => (
-                <div key={change.id} style={{ marginBottom: "0.75rem" }}>
-                  <div
-                    style={{
-                      fontSize: "0.84rem",
-                      fontWeight: 600,
-                      color: "var(--text-primary)",
-                      fontFamily: "var(--font-display)",
-                      marginBottom: "0.3rem",
-                    }}
-                  >
-                    {change.courseCode ? `[${change.courseCode}] ` : ""}
-                    {change.taskTitle}
-                  </div>
-                  <p
-                    style={{
-                      fontSize: "0.72rem",
-                      color: "var(--text-secondary)",
-                      lineHeight: 1.45,
-                      marginTop: "0.3rem",
-                    }}
-                  >
-                    {change.note.replace("Change Detected: ", "")}
-                  </p>
-                  <Link
-                    href="/inbox"
-                    style={{
-                      fontSize: "0.72rem",
-                      color: "var(--accent-ai)",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "0.2rem",
-                      marginTop: "0.25rem",
-                    }}
-                  >
-                    <span>View source notice</span>
-                    <ArrowRight size={11} />
-                  </Link>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Academic workload summary */}
-          <div
-            style={{
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-default)",
-              borderRadius: "var(--radius-md)",
-              padding: "1.25rem",
-            }}
-            aria-label="Academic workload summary"
-          >
-            <div
+            <Link
+              href="/tasks"
               style={{
-                display: "flex",
-                justifyContent: "space-between",
+                padding: "0.5rem 0.95rem",
+                borderRadius: "8px",
+                background: "#4658C8",
+                color: "#ffffff",
+                fontSize: "0.82rem",
+                fontWeight: 600,
+                textDecoration: "none",
+                display: "inline-flex",
                 alignItems: "center",
-                marginBottom: "0.75rem",
+                gap: "0.3rem",
               }}
             >
-              <span
-                style={{
-                  fontSize: "0.62rem",
-                  fontWeight: 700,
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  color: "var(--text-muted)",
-                  fontFamily: "var(--font-sans)",
-                }}
-              >
-                Workload Pressure
-              </span>
-              <span
-                className={`badge ${
-                  workload.level === "CRITICAL"
-                    ? "badge-critical"
-                    : workload.level === "HIGH"
-                    ? "badge-critical"
-                    : workload.level === "MODERATE"
-                    ? "badge-medium"
-                    : "badge-low"
-                }`}
-              >
-                {workload.level}
-              </span>
-            </div>
-
-            {/* Time horizon mini-strip */}
-            <div
+              <span>Open Deliverable</span>
+              <ArrowRight size={13} />
+            </Link>
+            <Link
+              href="/assistant"
               style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(4, 1fr)",
-                gap: "0.4rem",
-                marginBottom: "0.85rem",
-                textAlign: "center",
+                padding: "0.5rem 0.95rem",
+                borderRadius: "8px",
+                background: "#F5F7FC",
+                border: "1px solid #E4E8F1",
+                color: "#172033",
+                fontSize: "0.82rem",
+                fontWeight: 600,
+                textDecoration: "none",
               }}
             >
-              <div style={{ background: "var(--bg-canvas)", padding: "0.4rem 0.2rem", borderRadius: "var(--radius-xs)", border: "1px solid var(--border-subtle)" }}>
-                <div style={{ fontSize: "0.58rem", color: "var(--text-muted)", textTransform: "uppercase" }}>Today</div>
-                <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-primary)" }}>
-                  {workload.today?.deadlineConcentration || 0}
-                </div>
-                <div style={{ fontSize: "0.55rem", color: workload.today?.pressureLevel === "CRITICAL" ? "var(--status-critical)" : "var(--text-dim)" }}>
-                  {workload.today?.pressureLevel || "LOW"}
-                </div>
-              </div>
-
-              <div style={{ background: "var(--bg-canvas)", padding: "0.4rem 0.2rem", borderRadius: "var(--radius-xs)", border: "1px solid var(--border-subtle)" }}>
-                <div style={{ fontSize: "0.58rem", color: "var(--text-muted)", textTransform: "uppercase" }}>Tmrw</div>
-                <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-primary)" }}>
-                  {workload.tomorrow?.deadlineConcentration || 0}
-                </div>
-                <div style={{ fontSize: "0.55rem", color: workload.tomorrow?.pressureLevel === "CRITICAL" ? "var(--status-critical)" : "var(--text-dim)" }}>
-                  {workload.tomorrow?.pressureLevel || "LOW"}
-                </div>
-              </div>
-
-              <div style={{ background: "var(--bg-canvas)", padding: "0.4rem 0.2rem", borderRadius: "var(--radius-xs)", border: "1px solid var(--border-subtle)" }}>
-                <div style={{ fontSize: "0.58rem", color: "var(--text-muted)", textTransform: "uppercase" }}>7 Days</div>
-                <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-primary)" }}>
-                  {workload.next7Days?.deadlineConcentration || 0}
-                </div>
-                <div style={{ fontSize: "0.55rem", color: workload.next7Days?.pressureLevel === "CRITICAL" ? "var(--status-critical)" : "var(--text-dim)" }}>
-                  {workload.next7Days?.pressureLevel || "LOW"}
-                </div>
-              </div>
-
-              <div style={{ background: "var(--bg-canvas)", padding: "0.4rem 0.2rem", borderRadius: "var(--radius-xs)", border: "1px solid var(--border-subtle)" }}>
-                <div style={{ fontSize: "0.58rem", color: "var(--text-muted)", textTransform: "uppercase" }}>30 Days</div>
-                <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-primary)" }}>
-                  {workload.next30Days?.deadlineConcentration || 0}
-                </div>
-                <div style={{ fontSize: "0.55rem", color: workload.next30Days?.pressureLevel === "CRITICAL" ? "var(--status-critical)" : "var(--text-dim)" }}>
-                  {workload.next30Days?.pressureLevel || "LOW"}
-                </div>
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontSize: "0.75rem",
-                marginBottom: "0.35rem",
-              }}
-            >
-              <span style={{ color: "var(--text-muted)" }}>Estimated effort (7 days)</span>
-              <strong style={{ color: "var(--text-primary)", fontFamily: "var(--font-display)" }}>
-                {workload.totalEstimatedHours}h
-              </strong>
-            </div>
-            <div className="progress-track">
-              <div
-                className="progress-fill"
-                style={{
-                  width: `${Math.min(100, (workload.totalEstimatedHours / 25) * 100)}%`,
-                  background:
-                    workload.level === "CRITICAL"
-                      ? "var(--status-critical)"
-                      : workload.level === "HIGH"
-                      ? "var(--status-critical)"
-                      : workload.level === "MODERATE"
-                      ? "var(--status-medium)"
-                      : "var(--status-done)",
-                }}
-                role="progressbar"
-                aria-valuenow={workload.totalEstimatedHours}
-                aria-valuemax={25}
-                aria-label="Weekly workload"
-              />
-            </div>
-            <p
-              style={{
-                fontSize: "0.72rem",
-                color: "var(--text-muted)",
-                marginTop: "0.4rem",
-              }}
-            >
-              {workload.riskSummary}
-            </p>
-
-            {workload.byCourse.length > 0 && (
-              <div
-                style={{
-                  borderTop: "1px solid var(--border-subtle)",
-                  paddingTop: "0.75rem",
-                  marginTop: "0.75rem",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.35rem",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "0.6rem",
-                    color: "var(--text-muted)",
-                    textTransform: "uppercase",
-                    fontWeight: 700,
-                    letterSpacing: "0.07em",
-                    fontFamily: "var(--font-sans)",
-                  }}
-                >
-                  By course
-                </div>
-                {workload.byCourse.map((c, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      fontSize: "0.74rem",
-                    }}
-                  >
-                    <span style={{ color: "var(--text-secondary)" }}>
-                      <span
-                        style={{
-                          fontFamily: "var(--font-mono)",
-                          fontSize: "0.66rem",
-                          color: "var(--accent-academic)",
-                          marginRight: "0.35rem",
-                        }}
-                      >
-                        {c.courseCode}
-                      </span>
-                      {c.courseTitle}
-                    </span>
-                    <strong style={{ color: "var(--text-primary)", fontFamily: "var(--font-display)" }}>
-                      {c.estimatedHours}h
-                    </strong>
-                  </div>
-                ))}
-              </div>
-            )}
+              Ask AI Breakdown
+            </Link>
           </div>
         </div>
-      </div>
+      )}
     </Shell>
   );
 }

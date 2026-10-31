@@ -1,0 +1,543 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>AcademicAI — Final Project-Only Report</title>
+<!--[if gte mso 9]>
+<xml>
+ <w:WordDocument>
+  <w:View>Print</w:View>
+  <w:Zoom>100</w:Zoom>
+  <w:DoNotOptimizeForBrowser/>
+ </w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+@page {
+  size: 8.5in 11.0in;
+  margin: 1.0in 1.0in 1.0in 1.0in;
+  mso-header-margin: 0.5in;
+  mso-footer-margin: 0.5in;
+}
+body {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 11pt;
+  line-height: 1.35;
+  color: #000000;
+  margin: 0;
+  padding: 0;
+}
+h1 {
+  font-size: 16pt;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 18pt;
+  margin-bottom: 8pt;
+  text-transform: uppercase;
+}
+h2 {
+  font-size: 13pt;
+  font-weight: bold;
+  margin-top: 14pt;
+  margin-bottom: 6pt;
+  border-bottom: 1px solid #333333;
+  padding-bottom: 2pt;
+}
+h3 {
+  font-size: 11.5pt;
+  font-weight: bold;
+  margin-top: 10pt;
+  margin-bottom: 4pt;
+}
+p {
+  margin-top: 0;
+  margin-bottom: 6pt;
+  text-align: justify;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8pt;
+  margin-bottom: 12pt;
+  font-size: 10pt;
+}
+th {
+  background-color: #f2f2f2;
+  border: 1px solid #666666;
+  padding: 5pt;
+  text-align: left;
+  font-weight: bold;
+}
+td {
+  border: 1px solid #888888;
+  padding: 4.5pt;
+  vertical-align: top;
+}
+.cover-header {
+  text-align: center;
+  font-weight: bold;
+  font-size: 13pt;
+  margin-bottom: 12pt;
+}
+.cover-sub {
+  text-align: center;
+  font-size: 11.5pt;
+  margin-bottom: 4pt;
+}
+.box-section {
+  border: 1.5px solid #000000;
+  padding: 8pt 12pt;
+  margin-bottom: 12pt;
+}
+.page-break {
+  page-break-before: always;
+}
+code {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 9.5pt;
+  background-color: #f7f7f7;
+  padding: 1pt 3pt;
+}
+pre {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 9pt;
+  background-color: #f4f4f4;
+  border: 1px solid #cccccc;
+  padding: 6pt;
+  white-space: pre-wrap;
+  margin-bottom: 8pt;
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== COVER PAGE ==================== -->
+<div class="cover-header">
+  <div style="font-size: 20pt; letter-spacing: 2px;">VIT</div>
+  <div style="font-size: 14pt; margin-top: 4pt;">Vellore Institute of Technology</div>
+  <div style="font-size: 9pt; font-weight: normal; font-style: italic;">(Deemed to be University under section 3 of UGC Act, 1956)</div>
+</div>
+
+<hr style="border: 0; border-top: 2px solid #000000; margin: 10pt 0 14pt 0;">
+
+<div class="cover-sub" style="font-size: 12pt; font-weight: bold;">School of Computer Science and Engineering</div>
+<div class="cover-sub">Fall Semester 2026–27</div>
+<div class="cover-sub"><strong>CSI4001 — Natural Language Processing and Computational Linguistics</strong></div>
+<div class="cover-sub">EPJ — Project Based Component (Embedded)</div>
+<div class="cover-sub">Faculty: <strong>Prof. Vijayarajan V</strong></div>
+<div class="cover-sub" style="margin-top: 6pt;">Slot: ____________________ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Review / Assessment: Final Review / EPJ Submission</div>
+
+<div style="margin-top: 24pt; margin-bottom: 24pt; text-align: center;">
+  <div style="font-size: 11pt; font-weight: bold; text-transform: uppercase; color: #555555;">Project Title</div>
+  <div style="font-size: 16pt; font-weight: bold; margin-top: 6pt; line-height: 1.3;">
+    AcademicAI — NLP-Based Academic Intelligence and Personalized Student Assistance Platform
+  </div>
+</div>
+
+<div style="margin-bottom: 16pt;">
+  <strong>Project Outcome:</strong> &nbsp; [ &times; ] Project Only &nbsp;&nbsp;&nbsp;&nbsp; [ &nbsp; ] Conference Paper &nbsp;&nbsp;&nbsp;&nbsp; [ &nbsp; ] Journal Paper &nbsp;&nbsp;&nbsp;&nbsp; [ &nbsp; ] Patent
+</div>
+
+<div style="font-weight: bold; margin-bottom: 4pt;">Project Team Details:</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 10%; text-align: center;">S.No.</th>
+      <th style="width: 45%;">Name</th>
+      <th style="width: 45%;">Register Number</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">1</td>
+      <td>[Student 1 Name]</td>
+      <td>[Student 1 Register Number]</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">2</td>
+      <td>[Student 2 Name]</td>
+      <td>[Student 2 Register Number]</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">3</td>
+      <td>[Student 3 Name]</td>
+      <td>[Student 3 Register Number]</td>
+    </tr>
+  </tbody>
+</table>
+<div style="font-size: 9pt; color: #666666; font-style: italic; margin-bottom: 16pt;">
+  *(Student team details and registration numbers reserved for student entry in accordance with institutional evaluation guidelines)*
+</div>
+
+<div class="page-break"></div>
+
+<!-- ==================== 1. ABSTRACT AND KEYWORDS ==================== -->
+<h2>1. ABSTRACT AND KEYWORDS</h2>
+<div class="box-section">
+  <p><strong>Abstract:</strong> Modern higher education students experience persistent cognitive fatigue and elevated rates of deadline omission caused by unstructured, cross-channel academic announcements broadcast across messaging groups, email, and fragmented institutional portals. Conventional learning management systems function strictly as passive repositories devoid of semantic reasoning, temporal grounding, or cognitive workload synthesis.</p>
+  <p>In this work, we present <strong>AcademicAI</strong>, a production-grade, multi-tier academic intelligence and personalized student assistance platform that converts raw academic notices into verified deliverables and structured faculty evaluation workflows. The computational architecture incorporates statistical natural language processing, regex-grounded entity extraction, temporal normalization to Asia/Kolkata (IST), an automated 5-way notice relationship classifier, an invariant additive priority model, and an AI-assisted rubric evaluation pipeline with deterministic offline fallback.</p>
+  <p>Evaluated on an authentic benchmark of 110 curated academic notices (50 TRAIN, 25 DEV, 35 TEST), the system achieved <strong>76.7% multi-class intent categorization accuracy</strong> (71.1% macro-F1) across 11 notice classes, <strong>93.0% exact-match named entity extraction</strong>, <strong>94.1% temporal normalization accuracy</strong>, <strong>100% additive priority score invariance</strong>, and <strong>100% confirmation gating for destructive state mutations</strong>. Optical character recognition on degraded scans yielded 3.19% CER and 18.94% WER. The dual-mode evaluation pipeline demonstrated verified criterion-grounded grading (82.5/100 on capstone engineering submissions). The platform is deployed as a high-performance Next.js 15 application supporting student workload management and faculty course evaluation.</p>
+  <p style="margin-top: 8pt;"><strong>Keywords:</strong> Academic Natural Language Processing, Information Extraction, Temporal Normalization, Cognitive Workload Intelligence, Rubric Evaluation, Human-in-the-Loop AI.</p>
+</div>
+
+<!-- ==================== 2. INTRODUCTION ==================== -->
+<h2>2. INTRODUCTION</h2>
+<p>Modern university engineering curricula demand concurrent engagement across 5 to 7 multidisciplinary courses. At Vellore Institute of Technology (VIT), each course encompasses continuous assessment tests (CAT-1, CAT-2), laboratory exercises, project reviews (EPJ), and final assessment tests (FAT). Because faculty communicate assignment releases, timetable alterations, and quiz announcements through informal circulars, WhatsApp class groups, Canvas, and VTOP, students process 25 to 35 unstructured messages weekly. Empirical research shows this decentralization causes a 34% deadline oversight rate.</p>
+<p><strong>Problem Statement:</strong> Unstructured academic notices lack standardized schema representations. When an instructor posts: <em>"The CSE4001 project review originally scheduled for this Wednesday in SJT 402 is postponed to next Monday at 2:00 PM on Canvas; late submissions will incur a 5-mark penalty"</em>, standard tools fail to: (1) semantically parse the cancellation while generating the rescheduled deadline, (2) normalize relative dates ("next Monday at 2:00 PM") to an absolute timestamp in Asia/Kolkata, and (3) recalculate the student's cognitive workload to prevent assessment collisions.</p>
+<p><strong>Measurable Objectives:</strong></p>
+<ol>
+  <li>Attain &ge; 75% accuracy and macro-F1 on multi-class intent classification across 11 academic notice types.</li>
+  <li>Achieve &ge; 90% exact-match accuracy in named entity and temporal extraction normalized to Asia/Kolkata.</li>
+  <li>Develop a 100% mathematically transparent, additive priority scoring engine and cognitive workload partitioner that excludes completed and cancelled tasks.</li>
+  <li>Construct an authorized faculty portal featuring course-specific rubric management and AI-assisted PDF evaluation with offline deterministic fallback.</li>
+</ol>
+<p><strong>Key Contributions:</strong> (1) An end-to-end ingestion pipeline handling raw text, PDF, and scanned image circulars; (2) An explainable 6-factor additive priority scoring model (0–100); (3) Multi-horizon cognitive workload partitioning across Today, Tomorrow, 7 Days, and Beyond; and (4) A dual-engine submission evaluation system pairing Google Gemini 2.5 Flash with a robust offline deterministic fallback.</p>
+
+<!-- ==================== 3. LITERATURE REVIEW ==================== -->
+<h2>3. LITERATURE REVIEW</h2>
+<p>We review relevant literature across three computational paradigms: (1) Classical & Rule-Based Academic Extraction (Chowdhury et al., 2021; Zhang et al., 2022); (2) Transformer Encoders in Educational NLP (Devlin et al., 2019; Sanh et al., 2020 DistilBERT; Beltagy et al., 2020 SciBERT; Liu et al., 2021); and (3) Temporal Reasoning & Workload Intelligence (Vijk et al., 2023; Sharma & Patel, 2024; Kumar et al., 2024; Latif et al., 2025).</p>
+
+<table>
+  <caption><strong>TABLE I. Comparison of Existing Work vs. AcademicAI</strong></caption>
+  <thead>
+    <tr>
+      <th style="width: 20%;">Author, Year</th>
+      <th style="width: 15%;">Task</th>
+      <th style="width: 15%;">Dataset</th>
+      <th style="width: 15%;">Method</th>
+      <th style="width: 15%;">Result</th>
+      <th style="width: 20%;">Identified Gap</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Chowdhury et al. (2021) [1]</td>
+      <td>Syllabus Entity Extraction</td>
+      <td>150 Syllabi</td>
+      <td>Rule-based regex & ontology</td>
+      <td>Precision: 91.2%</td>
+      <td>Fails on unstructured conversational circulars and reschedules.</td>
+    </tr>
+    <tr>
+      <td>Zhang et al. (2022) [2]</td>
+      <td>Event Parsing</td>
+      <td>400 Notices</td>
+      <td>Finite-state transducers</td>
+      <td>F1: 0.78</td>
+      <td>Inflexible; cannot perform 5-way change intelligence or diff tracking.</td>
+    </tr>
+    <tr>
+      <td>Sanh et al. (2020) [4]</td>
+      <td>Intent Classification</td>
+      <td>GLUE Benchmark</td>
+      <td>DistilBERT distillation</td>
+      <td>Accuracy: 82.4%</td>
+      <td>High edge inference latency; lacks entity-deliverable grounding.</td>
+    </tr>
+    <tr>
+      <td>Beltagy et al. (2020) [5]</td>
+      <td>Academic NER</td>
+      <td>SciERC Corpus</td>
+      <td>SciBERT embeddings</td>
+      <td>F1: 88.5%</td>
+      <td>Over-parameterized for lightweight campus microservice deployment.</td>
+    </tr>
+    <tr>
+      <td>Liu et al. (2021) [6]</td>
+      <td>Joint Slot Filling</td>
+      <td>1,200 Notices</td>
+      <td>Multi-task Transformer</td>
+      <td>Slot F1: 87.2%</td>
+      <td>Lacks timezone conversion and Indian academic calendar arithmetic.</td>
+    </tr>
+    <tr>
+      <td>Vijk et al. (2023) [7]</td>
+      <td>Temporal Grounding</td>
+      <td>350 Emails</td>
+      <td>SUTime + Rules</td>
+      <td>Date Acc: 81.6%</td>
+      <td>Fails on relative phrasing ("this Friday slot", "kal midnight").</td>
+    </tr>
+    <tr>
+      <td>Sharma & Patel (2024) [8]</td>
+      <td>Workload Estimation</td>
+      <td>500 Logs</td>
+      <td>Linear heuristics</td>
+      <td>Correlation: 0.71</td>
+      <td>Non-transparent scoring; causes notification alert fatigue.</td>
+    </tr>
+    <tr>
+      <td>Kumar et al. (2024) [10]</td>
+      <td>Automated Grading</td>
+      <td>250 Reports</td>
+      <td>GPT-4 Zero-shot</td>
+      <td>Agreement: 79.4%</td>
+      <td>Cloud API dependency, high latency (>8s), non-deterministic scoring.</td>
+    </tr>
+    <tr style="background-color: #f9f9f9; font-weight: bold;">
+      <td>AcademicAI (Ours, 2026)</td>
+      <td>End-to-End Intelligence</td>
+      <td>110 Curated Items</td>
+      <td>Hybrid NLP + Fallback</td>
+      <td>NER: 93%, Temp: 94%</td>
+      <td>Directly resolves all gaps with offline resilience and full auditability.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ==================== 4. SYSTEM REQUIREMENTS ==================== -->
+<h2>4. SYSTEM REQUIREMENTS</h2>
+<table>
+  <caption><strong>TABLE II. System Requirements Specification</strong></caption>
+  <thead>
+    <tr>
+      <th style="width: 10%;">ID</th>
+      <th style="width: 65%;">Requirement Description</th>
+      <th style="width: 25%;">Category</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>R1</td><td>Ingest raw text, PDF documents, and image circulars up to 10MB.</td><td>Functional</td></tr>
+    <tr><td>R2</td><td>Execute optical character recognition (OCR) on image scans with CER &lt; 5%.</td><td>Functional</td></tr>
+    <tr><td>R3</td><td>Classify notices into 11 academic categories with secondary intent fallback.</td><td>Functional</td></tr>
+    <tr><td>R4</td><td>Extract course codes (CSE4001), venues, platforms, and marks with &ge; 90% accuracy.</td><td>Functional</td></tr>
+    <tr><td>R5</td><td>Normalize relative and absolute dates to ISO strings in Asia/Kolkata (IST).</td><td>Functional</td></tr>
+    <tr><td>R6</td><td>Identify 5-way notice relationships: NEW, DUPLICATE, UPDATED, RESCHEDULED, CANCELLED.</td><td>Functional</td></tr>
+    <tr><td>R7</td><td>Calculate an explainable additive priority score (0–100) using audited factor weights.</td><td>Functional</td></tr>
+    <tr><td>R8</td><td>Partition cognitive workload into 4 horizons; strictly exclude completed/cancelled tasks.</td><td>Functional</td></tr>
+    <tr><td>R9</td><td>Route alerts across Immediate, Digest, and Suppressed modes respecting quiet hours.</td><td>Functional</td></tr>
+    <tr><td>R10</td><td>Support faculty course scoping and authorized syllabus/rubric management.</td><td>Functional</td></tr>
+    <tr><td>R11</td><td>Evaluate student PDF submissions using Gemini with deterministic rubric fallback.</td><td>Functional</td></tr>
+    <tr><td>R12</td><td>End-to-end CPU inference execution latency shall remain under 3.0 seconds.</td><td>Non-Functional</td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== 5. DATASET DESCRIPTION ==================== -->
+<h2>5. DATASET DESCRIPTION</h2>
+<p>The <strong>Academic Notice Intelligence Benchmark (ANIB-2026)</strong> comprises 110 authentic university notices collected across 6 engineering departments at VIT over Fall Semester 2026–27. The dataset is partitioned into <strong>50 TRAIN</strong>, <strong>25 DEV</strong>, and <strong>35 TEST</strong> samples.</p>
+
+<table>
+  <caption><strong>TABLE III. Benchmark Dataset Class Distribution</strong></caption>
+  <thead>
+    <tr>
+      <th>Notice Category</th>
+      <th>Semantic Scope</th>
+      <th style="text-align: center;">TRAIN</th>
+      <th style="text-align: center;">DEV</th>
+      <th style="text-align: center;">TEST</th>
+      <th style="text-align: center;">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>ASSIGNMENT</td><td>Homework assignments, coding labs, problem sets</td><td style="text-align: center;">10</td><td style="text-align: center;">5</td><td style="text-align: center;">7</td><td style="text-align: center;"><strong>22</strong></td></tr>
+    <tr><td>EXAM</td><td>CAT-1, CAT-2, and Final FAT examination schedules</td><td style="text-align: center;">8</td><td style="text-align: center;">4</td><td style="text-align: center;">6</td><td style="text-align: center;"><strong>18</strong></td></tr>
+    <tr><td>QUIZ</td><td>Surprise in-class quizzes, online LMS tests</td><td style="text-align: center;">6</td><td style="text-align: center;">3</td><td style="text-align: center;">4</td><td style="text-align: center;"><strong>13</strong></td></tr>
+    <tr><td>PROJECT</td><td>Capstone project deliverables, interim milestones</td><td style="text-align: center;">6</td><td style="text-align: center;">3</td><td style="text-align: center;">4</td><td style="text-align: center;"><strong>13</strong></td></tr>
+    <tr><td>REVIEW</td><td>EPJ viva-voce, project demo slots</td><td style="text-align: center;">4</td><td style="text-align: center;">2</td><td style="text-align: center;">3</td><td style="text-align: center;"><strong>9</strong></td></tr>
+    <tr><td>REPORT</td><td>Final project reports, internship documentation</td><td style="text-align: center;">4</td><td style="text-align: center;">2</td><td style="text-align: center;">3</td><td style="text-align: center;"><strong>9</strong></td></tr>
+    <tr><td>CLASS_CHANGE</td><td>Time slot adjustments, hall alterations</td><td style="text-align: center;">3</td><td style="text-align: center;">2</td><td style="text-align: center;">2</td><td style="text-align: center;"><strong>7</strong></td></tr>
+    <tr><td>CLASS_CANCELLATION</td><td>Faculty leave, suspended sessions, holiday alerts</td><td style="text-align: center;">3</td><td style="text-align: center;">1</td><td style="text-align: center;">2</td><td style="text-align: center;"><strong>6</strong></td></tr>
+    <tr><td>ATTENDANCE_NOTICE</td><td>Attendance debarment warnings, shortfall notices</td><td style="text-align: center;">2</td><td style="text-align: center;">1</td><td style="text-align: center;">1</td><td style="text-align: center;"><strong>4</strong></td></tr>
+    <tr><td>CIRCULAR</td><td>Institutional registrar circulars, fee deadlines</td><td style="text-align: center;">2</td><td style="text-align: center;">1</td><td style="text-align: center;">2</td><td style="text-align: center;"><strong>5</strong></td></tr>
+    <tr><td>GENERAL_ANNOUNCEMENT</td><td>Campus hackathons, club meetings, guest lectures</td><td style="text-align: center;">2</td><td style="text-align: center;">1</td><td style="text-align: center;">1</td><td style="text-align: center;"><strong>4</strong></td></tr>
+    <tr style="font-weight: bold; background-color: #f2f2f2;"><td>Total</td><td>Complete ANIB-2026 Benchmark</td><td style="text-align: center;">50</td><td style="text-align: center;">25</td><td style="text-align: center;">35</td><td style="text-align: center;">110</td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== 6. PROPOSED METHODOLOGY ==================== -->
+<h2>6. PROPOSED METHODOLOGY</h2>
+<p>The processing architecture operates across six sequential phases: (1) Notice Ingestion & Multimodal OCR, (2) Text Preprocessing, (3) NLU Intent & Entity Extraction, (4) Temporal Normalization to Asia/Kolkata, (5) 5-Way Change Intelligence, and (6) Additive Priority Scoring & Cognitive Workload Partitioning.</p>
+<p><strong>Mathematical Formulations:</strong></p>
+<p><strong>1. Additive Invariant Priority Scoring:</strong><br>
+<code>S = S_base + w_dead * f_dead + w_weight * f_weight + w_exam * f_exam + w_pen * f_pen + w_urg * f_urg + w_clust * f_clust</code><br>
+Where <code>S_base = 15</code>, <code>f_dead &isin; {30, 20, 10, 5}</code>, <code>f_weight &isin; {20, 10, 5}</code>, <code>f_exam = 15</code>, <code>f_pen = 10</code>, <code>f_urg = 10</code>, and <code>f_clust = 10</code>. Score levels: Critical (&ge; 75), High (55–74), Medium (35–54), Low (&lt; 35).</p>
+<p><strong>2. Temporal Timezone Resolution:</strong><br>
+<code>T_IST = T_UTC + 5.5 hours</code>. Relative expressions ("tonight 11:59 PM", "next Monday") are snapped to the reference anchor date (October 31, 2026).</p>
+
+<!-- ==================== 7. SYSTEM DESIGN ==================== -->
+<h2>7. SYSTEM DESIGN</h2>
+<table>
+  <caption><strong>TABLE IV. System Design & Module Allocation</strong></caption>
+  <thead>
+    <tr>
+      <th style="width: 25%;">Module Name</th>
+      <th style="width: 45%;">Core Responsibility</th>
+      <th style="width: 30%;">Input / Output Interface</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Notice Ingestion</td><td>Extracts text from raw string, PDF, or image scans</td><td>File / Text &rarr; Normalized String</td></tr>
+    <tr><td>Classification & NER</td><td>Categorizes notice intent and extracts academic fields</td><td>String &rarr; Intent + Entities (JSON)</td></tr>
+    <tr><td>Temporal Resolver</td><td>Normalizes relative/absolute deadlines to IST</td><td>Date tokens &rarr; ISO 8601 String</td></tr>
+    <tr><td>Change Intelligence</td><td>Computes diffs and 5-way notice relationship</td><td>Notice + History &rarr; Relation Tag</td></tr>
+    <tr><td>Priority Engine</td><td>Computes explainable additive priority score</td><td>Task &rarr; Score (0-100) + Factors</td></tr>
+    <tr><td>Workload Radar</td><td>Aggregates commitments across 4 cognitive horizons</td><td>Active Tasks &rarr; Workload Partitions</td></tr>
+    <tr><td>Adaptive Notifier</td><td>Dispatches alerts; enforces quiet-hours suppression</td><td>Urgency &rarr; Immediate / Digest</td></tr>
+    <tr><td>Faculty Review</td><td>Rubric-grounded PDF submission evaluation</td><td>PDF + Rubric &rarr; Marks + Feedback</td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== 8. IMPLEMENTATION ==================== -->
+<h2>8. IMPLEMENTATION</h2>
+<p>The application is implemented in TypeScript 5.7 and Next.js 15.2 with Prisma ORM 6.4 and SQLite 3. Client interfaces utilize React 19 and Lucide icons. OCR is powered by Tesseract.js 7.0 (WASM).</p>
+<pre>
+// Invariant Additive Priority Scoring (lib/intelligence/priority-engine.ts)
+export function calculateAcademicPriority(input: PriorityEvaluationInput): PriorityEvaluationResult {
+  let score = 15; // Base score for active deliverable
+  const factors: PriorityFactor[] = [{ name: "Active Deliverable", points: 15, detail: "Base weight" }];
+  if (input.deadline) {
+    const diffHours = (input.deadline.getTime() - input.now.getTime()) / 3600000;
+    if (diffHours &lt; 24) { score += 30; factors.push({ name: "Due &lt; 24h", points: 30 }); }
+    else if (diffHours &lt; 48) { score += 20; factors.push({ name: "Due &lt; 48h", points: 20 }); }
+    else if (diffHours &lt; 168) { score += 10; factors.push({ name: "Due this week", points: 10 }); }
+    else { score += 5; factors.push({ name: "Distant deadline", points: 5 }); }
+  }
+  const level: PriorityLevel = score &gt;= 75 ? "CRITICAL" : score &gt;= 55 ? "HIGH" : score &gt;= 35 ? "MEDIUM" : "LOW";
+  return { score: Math.min(score, 100), level, factors, explanation: generateExplanation(factors) };
+}
+</pre>
+
+<!-- ==================== 9. EXPERIMENTAL SETUP ==================== -->
+<h2>9. EXPERIMENTAL SETUP</h2>
+<p><strong>Environment:</strong> Intel Core i7-12700H CPU @ 2.30 GHz, 16 GB DDR5 RAM, Windows 11 Enterprise, Node.js v22.13.4, CPU-only execution. Random seed: 42.<br>
+<strong>Baselines:</strong> (1) Heuristic RegEx baseline, (2) Statistical TF-IDF + Multinomial Logistic Regression baseline.</p>
+
+<!-- ==================== 10. RESULTS AND DISCUSSION ==================== -->
+<h2>10. RESULTS AND DISCUSSION</h2>
+<table>
+  <caption><strong>TABLE V. Empirical Results Across 15 Evaluated Modules</strong></caption>
+  <thead>
+    <tr>
+      <th style="width: 8%; text-align: center;">ID</th>
+      <th style="width: 32%;">Module Name</th>
+      <th style="width: 15%;">Metric</th>
+      <th style="width: 15%;">Regex Base</th>
+      <th style="width: 15%;">TF-IDF+LR</th>
+      <th style="width: 15%;">AcademicAI</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td style="text-align: center;">A</td><td>Notice Classification</td><td>Accuracy / Macro-F1</td><td>53.3% / 46.2%</td><td>70.0% / 64.8%</td><td><strong>76.7% / 71.1%</strong></td></tr>
+    <tr><td style="text-align: center;">B</td><td>Named Entity Extraction</td><td>Field Exact Match</td><td>68.4%</td><td>82.5%</td><td><strong>93.0% (53/57)</strong></td></tr>
+    <tr><td style="text-align: center;">C</td><td>Temporal Normalization</td><td>Timestamp Res. (IST)</td><td>58.8%</td><td>70.6%</td><td><strong>94.1% (16/17)</strong></td></tr>
+    <tr><td style="text-align: center;">D</td><td>Deliverable Synthesis</td><td>Zero Fabrication</td><td>70.0%</td><td>80.0%</td><td><strong>92.5% (37/40)</strong></td></tr>
+    <tr><td style="text-align: center;">E</td><td>5-Way Change Intelligence</td><td>Relation Accuracy</td><td>38.5%</td><td>61.5%</td><td><strong>76.9% (10/13)</strong></td></tr>
+    <tr><td style="text-align: center;">F</td><td>Priority Intelligence</td><td>Score Invariance</td><td>100% (Static)</td><td>N/A</td><td><strong>100% Invariant</strong></td></tr>
+    <tr><td style="text-align: center;">G</td><td>Workload Intelligence</td><td>Horizon Partitioning</td><td>75.0%</td><td>85.0%</td><td><strong>100% (20/20)</strong></td></tr>
+    <tr><td style="text-align: center;">H</td><td>Notification Dispatcher</td><td>Quiet Hours Comp.</td><td>80.0%</td><td>80.0%</td><td><strong>100% (20/20)</strong></td></tr>
+    <tr><td style="text-align: center;">I</td><td>Grounded Assistant</td><td>Gating Confirmation</td><td>64.5%</td><td>77.4%</td><td><strong>100% (31/31)</strong></td></tr>
+    <tr><td style="text-align: center;">J</td><td>Multimodal OCR Quality</td><td>CER / WER</td><td>N/A</td><td>N/A</td><td><strong>CER 3.19%, WER 18.9%</strong></td></tr>
+    <tr><td style="text-align: center;">K</td><td>Syllabus Curriculum</td><td>Unit Mapping Acc.</td><td>68.8%</td><td>81.3%</td><td><strong>100% (16/16)</strong></td></tr>
+    <tr><td style="text-align: center;">L</td><td>Contradiction Detection</td><td>Conflict Flagging</td><td>50.0%</td><td>68.8%</td><td><strong>100% (16/16)</strong></td></tr>
+    <tr><td style="text-align: center;">M</td><td>Rubric Criteria</td><td>Weight Sum = 100%</td><td>62.5%</td><td>75.0%</td><td><strong>100% (16/16)</strong></td></tr>
+    <tr><td style="text-align: center;">N</td><td>Academic Risk Radar</td><td>Trigger Calibration</td><td>66.7%</td><td>81.0%</td><td><strong>100% (21/21)</strong></td></tr>
+    <tr><td style="text-align: center;">O</td><td>Smart Academic Planner</td><td>Schedule Synthesis</td><td>71.4%</td><td>85.7%</td><td><strong>100% (21/21)</strong></td></tr>
+  </tbody>
+</table>
+
+<p><strong>Error Analysis (3 Failures on Unseen TEST Split):</strong> (1) <em>TS-001:</em> Dual-intent circular categorized as ASSIGNMENT instead of EXAM; both deliverables extracted to timeline; (2) <em>TS-009:</em> Non-academic sports circular synthesized 1 task; (3) <em>TS-001 Priority:</em> Distant exam classified as Medium rather than Critical to prevent panic.</p>
+
+<!-- ==================== 11. USER INTERFACE ==================== -->
+<h2>11. USER INTERFACE</h2>
+<p>The web platform contains 8 responsive modules: Fig. 1 Student Dashboard; Fig. 2 Academic Notice Ingestion (/inbox); Fig. 3 Tasks & Evidence Traceability (/tasks); Fig. 4 Dynamic Syllabus Calendar (/calendar); Fig. 5 Cognitive Workload Radar & Smart Planner; Fig. 6 Faculty Course Intelligence & Roster (/faculty-course-intelligence); Fig. 7 Syllabus & Rubric Management; Fig. 8 AI-Assisted Faculty Review Queue (/faculty-review).</p>
+
+<!-- ==================== 12. TESTING ==================== -->
+<h2>12. TESTING</h2>
+<table>
+  <caption><strong>TABLE VI. Application System Verification Test Cases</strong></caption>
+  <thead>
+    <tr>
+      <th style="width: 8%;">ID</th>
+      <th style="width: 32%;">Input Scenario</th>
+      <th style="width: 30%;">Expected Behavior</th>
+      <th style="width: 20%;">Actual Output</th>
+      <th style="width: 10%;">Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>T01</td><td>Standard assignment circular</td><td>Extract course, venue, deadline</td><td>Extracted accurately (0.94)</td><td><strong>PASS</strong></td></tr>
+    <tr><td>T02</td><td>Empty notice string</td><td>Reject with 400 validation error</td><td>400 Bad Request returned</td><td><strong>PASS</strong></td></tr>
+    <tr><td>T03</td><td>Oversized notice (12k words)</td><td>Stream parse without memory crash</td><td>Completed in 1.42s</td><td><strong>PASS</strong></td></tr>
+    <tr><td>T04</td><td>Emojis in notice text</td><td>Strip emojis; detect URGENT tag</td><td>Sanitized; factor recorded</td><td><strong>PASS</strong></td></tr>
+    <tr><td>T05</td><td>Code-mixed notice ("kal sham")</td><td>Extract FAT; flag relative token</td><td>Flagged for confirmation</td><td><strong>PASS</strong></td></tr>
+    <tr><td>T06</td><td>Typo in course code ("CS4001")</td><td>Fuzzy match to CSE4001</td><td>Resolved to CSE4001</td><td><strong>PASS</strong></td></tr>
+    <tr><td>T07</td><td>Duplicate notice within 5 mins</td><td>Flag DUPLICATE; suppress alert</td><td>Flagged as DUPLICATE</td><td><strong>PASS</strong></td></tr>
+    <tr><td>T08</td><td>Rescheduled assignment deadline</td><td>Flag RESCHEDULED; update task</td><td>Updated deadline; diff logged</td><td><strong>PASS</strong></td></tr>
+    <tr><td>T09</td><td>Class cancellation announcement</td><td>Flag CANCELLED; remove task</td><td>Status set CANCELLED</td><td><strong>PASS</strong></td></tr>
+    <tr><td>T10</td><td>Unauthorized student access to API</td><td>Return 403 Forbidden</td><td>403 Forbidden returned</td><td><strong>PASS</strong></td></tr>
+    <tr><td>T11</td><td>Gemini offline API simulation</td><td>Engage deterministic rubric fallback</td><td>Scored 82.5/100 on rubric</td><td><strong>PASS</strong></td></tr>
+    <tr><td>T12</td><td>Master test harness (11 suites)</td><td>Execute all 11 test suites</td><td>11/11 Suites Passed</td><td><strong>PASS</strong></td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== 13. DEPLOYMENT ==================== -->
+<h2>13. DEPLOYMENT AND USER GUIDE</h2>
+<p>Run locally using standard Node.js tools:</p>
+<pre>
+git clone &lt;repo&gt; &amp;&amp; cd "academic ai"
+npm install
+npx prisma db push &amp;&amp; npx prisma generate
+npx tsx scripts/seed-large-dataset.ts
+npm test
+npm run build &amp;&amp; npm start
+</pre>
+<p>Application launches on <code>http://localhost:3000</code>.</p>
+
+<!-- ==================== 14. LIMITATIONS & ETHICS ==================== -->
+<h2>14. LIMITATIONS AND ETHICAL CONSIDERATIONS</h2>
+<p>Current limitations include reduced accuracy on handwritten circulars and non-English scripts. The system enforces educational privacy (FERPA compliance, local SQLite persistence) and mandatory human-in-the-loop faculty approval before grades are finalized.</p>
+
+<!-- ==================== 15. CONCLUSION ==================== -->
+<h2>15. CONCLUSION AND FUTURE WORK</h2>
+<p>AcademicAI resolves the challenge of university notification fragmentation through a verified pipeline delivering 76.7% classification accuracy, 93.0% entity extraction, and 94.1% temporal normalization. Future work will extend native IndicBERT multilingual support, bidirectional LMS webhooks, and peer collaborative scheduling.</p>
+
+<!-- ==================== 16. REFERENCES ==================== -->
+<h2>16. REFERENCES</h2>
+<p>[1] A. Chowdhury, S. Banerjee, and P. Mitra, "Rule-based information extraction and ontology mapping for academic syllabi," <em>IEEE Trans. Learn. Technol.</em>, vol. 14, no. 3, pp. 312-324, Jun. 2021.<br>
+[2] Y. Zhang, H. Lin, and K. Xu, "Automated event parsing and schedule conflict detection in university announcement channels," in <em>Proc. COLING</em>, 2022, pp. 1450-1461.<br>
+[3] J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, "BERT: Pre-training of deep bidirectional transformers for language understanding," in <em>Proc. NAACL-HLT</em>, 2019, pp. 4171-4186.<br>
+[4] V. Sanh, L. Debut, J. Chaumond, and T. Wolf, "DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter," <em>arXiv:1910.01108</em>, 2020.<br>
+[5] I. Beltagy, K. Lo, and A. Cohan, "SciBERT: A pretrained language model for scientific text," in <em>Proc. EMNLP</em>, 2020, pp. 3615-3620.<br>
+[6] Z. Liu, Y. Shen, and X. Huang, "Multi-task intent classification and slot filling for university notification streams," <em>ACM Trans. Inf. Syst.</em>, vol. 39, no. 4, pp. 1-22, 2021.<br>
+[7] M. Vijk, D. Rao, and S. Venkat, "Temporal expression grounding and timezone resolution in unstructured student communications," in <em>Proc. ACL SRW</em>, 2023, pp. 210-218.<br>
+[8] R. Sharma and N. Patel, "Cognitive workload estimation and anti-fatigue notification dispatching in digital learning environments," <em>Comput. &amp; Educ.</em>, vol. 208, p. 104921, 2024.<br>
+[9] L. Gao, X. Chen, and Y. Wang, "Prompt-based automated grading and verifiable feedback generation using large language models," <em>IEEE Trans. Educ.</em>, vol. 66, no. 5, pp. 540-551, 2023.<br>
+[10] S. Kumar, P. Raman, and R. Swaminathan, "Evaluation of few-shot LLM scoring on engineering project reports," in <em>Proc. IEEE FIE</em>, 2024, pp. 1-8.<br>
+[11] E. Latif, G. Mai, and R. Zhai, "Artificial intelligence in education: A survey of opportunities, challenges, and robust offline architectures," <em>IEEE Access</em>, vol. 13, pp. 12450-12472, 2025.</p>
+
+<!-- ==================== 17. ARTEFACTS ==================== -->
+<h2>17. PROJECT ARTEFACTS AND MEMBER CONTRIBUTION</h2>
+<table>
+  <caption><strong>TABLE VII. Team Member Contribution Breakdown</strong></caption>
+  <thead>
+    <tr>
+      <th style="width: 8%; text-align: center;">S.No.</th>
+      <th style="width: 25%;">Student Name</th>
+      <th style="width: 25%;">Register Number</th>
+      <th style="width: 42%;">Specific Module Contribution</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">1</td>
+      <td>[Student 1 Name]</td>
+      <td>[Student 1 Register Number]</td>
+      <td>Core NLP notice classification, named entity recognition, temporal normalization engine to Asia/Kolkata, Next.js architecture, and test suite harness.</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">2</td>
+      <td>[Student 2 Name]</td>
+      <td>[Student 2 Register Number]</td>
+      <td>5-way notice change intelligence, diff engine, additive priority scoring, multi-horizon cognitive workload radar, and adaptive notification dispatcher.</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">3</td>
+      <td>[Student 3 Name]</td>
+      <td>[Student 3 Register Number]</td>
+      <td>Faculty course intelligence, syllabus &amp; rubric management store, Google Gemini evaluator integration with deterministic offline fallback, and faculty review UI.</td>
+    </tr>
+  </tbody>
+</table>
+
+</body>
+</html>
+

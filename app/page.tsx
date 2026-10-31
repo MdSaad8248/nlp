@@ -10,21 +10,18 @@ import {
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
-  Calendar,
-  Bell,
-  Cpu,
-  Layers,
-  FileCheck2,
-  Lock,
 } from "lucide-react";
-import { DEMO_STUDENTS, DEMO_TEACHERS } from "@/lib/auth/session";
 
 export default function RoleSelectionLandingPage() {
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<"STUDENT" | "TEACHER">("STUDENT");
   const [loading, setLoading] = useState<string | null>(null);
 
-  const quickLaunch = async (identifier: string, role: "STUDENT" | "TEACHER", password = role === "TEACHER" ? "teacher123" : "student123") => {
+  const quickLaunch = async (
+    identifier: string,
+    role: "STUDENT" | "TEACHER",
+    password = role === "TEACHER" ? "teacher123" : "student123"
+  ) => {
     setLoading(identifier);
     try {
       const res = await fetch("/api/auth", {
@@ -54,8 +51,8 @@ export default function RoleSelectionLandingPage() {
     <div
       style={{
         minHeight: "100vh",
-        background: "radial-gradient(ellipse at top, #0f172a 0%, #020617 100%)",
-        color: "#f8fafc",
+        background: "var(--bg-app)",
+        color: "var(--text-primary)",
         display: "flex",
         flexDirection: "column",
         position: "relative",
@@ -66,11 +63,16 @@ export default function RoleSelectionLandingPage() {
       <header
         style={{
           height: "72px",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+          borderBottom: "1px solid var(--border-default)",
+          background: "rgba(255, 255, 255, 0.92)",
+          backdropFilter: "blur(12px)",
           padding: "0 2.5rem",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          position: "sticky",
+          top: 0,
+          zIndex: 30,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
@@ -79,22 +81,38 @@ export default function RoleSelectionLandingPage() {
               width: "38px",
               height: "38px",
               borderRadius: "10px",
-              background: "linear-gradient(135deg, #2563eb, #3b82f6)",
+              background: "linear-gradient(135deg, #1B295A, #3448A5)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               color: "#ffffff",
-              boxShadow: "0 0 20px rgba(59, 130, 246, 0.4)",
+              boxShadow: "0 2px 10px rgba(52, 72, 165, 0.25)",
             }}
           >
             <Sparkles size={20} />
           </div>
           <div>
-            <div style={{ fontSize: "1.2rem", fontWeight: 800, letterSpacing: "-0.02em" }}>
+            <div
+              style={{
+                fontSize: "1.2rem",
+                fontWeight: 800,
+                letterSpacing: "-0.02em",
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-display)",
+              }}
+            >
               AcademicAI
             </div>
-            <div style={{ fontSize: "0.68rem", color: "#94a3b8", letterSpacing: "0.04em" }}>
-              ACADEMIC INTELLIGENCE PLATFORM
+            <div
+              style={{
+                fontSize: "0.68rem",
+                color: "var(--text-secondary)",
+                letterSpacing: "0.06em",
+                fontWeight: 600,
+                textTransform: "uppercase",
+              }}
+            >
+              Academic Intelligence Platform
             </div>
           </div>
         </div>
@@ -103,8 +121,9 @@ export default function RoleSelectionLandingPage() {
           <Link
             href="/about"
             style={{
-              fontSize: "0.82rem",
-              color: "#94a3b8",
+              fontSize: "0.84rem",
+              fontWeight: 500,
+              color: "var(--text-secondary)",
               textDecoration: "none",
               padding: "0.4rem 0.8rem",
               borderRadius: "6px",
@@ -115,16 +134,8 @@ export default function RoleSelectionLandingPage() {
           </Link>
           <Link
             href="/login"
-            style={{
-              fontSize: "0.82rem",
-              fontWeight: 600,
-              color: "#ffffff",
-              background: "rgba(255, 255, 255, 0.08)",
-              border: "1px solid rgba(255, 255, 255, 0.14)",
-              padding: "0.45rem 1rem",
-              borderRadius: "8px",
-              textDecoration: "none",
-            }}
+            className="btn btn-secondary btn-sm"
+            style={{ textDecoration: "none" }}
           >
             Direct Sign In
           </Link>
@@ -139,7 +150,7 @@ export default function RoleSelectionLandingPage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          padding: "3rem 1.5rem",
+          padding: "3.5rem 1.5rem",
           maxWidth: "1200px",
           margin: "0 auto",
           width: "100%",
@@ -154,9 +165,9 @@ export default function RoleSelectionLandingPage() {
               gap: "0.45rem",
               padding: "0.35rem 0.9rem",
               borderRadius: "999px",
-              background: "rgba(59, 130, 246, 0.12)",
-              border: "1px solid rgba(59, 130, 246, 0.28)",
-              color: "#60a5fa",
+              background: "rgba(52, 72, 165, 0.08)",
+              border: "1px solid rgba(52, 72, 165, 0.22)",
+              color: "#3448A5",
               fontSize: "0.74rem",
               fontWeight: 700,
               letterSpacing: "0.06em",
@@ -170,10 +181,11 @@ export default function RoleSelectionLandingPage() {
 
           <h1
             style={{
-              fontSize: "clamp(2rem, 4vw, 2.85rem)",
+              fontSize: "clamp(2.1rem, 4vw, 3rem)",
               fontWeight: 800,
               fontFamily: "var(--font-display)",
               letterSpacing: "-0.03em",
+              color: "var(--text-primary)",
               margin: 0,
               lineHeight: 1.15,
             }}
@@ -182,8 +194,8 @@ export default function RoleSelectionLandingPage() {
           </h1>
           <p
             style={{
-              fontSize: "1.02rem",
-              color: "#94a3b8",
+              fontSize: "1rem",
+              color: "var(--text-secondary)",
               marginTop: "0.85rem",
               lineHeight: 1.6,
             }}
@@ -193,7 +205,7 @@ export default function RoleSelectionLandingPage() {
           </p>
         </div>
 
-        {/* Two Prominent Role Cards Side-by-Side (VIT Inspired Arrangement) */}
+        {/* Two Prominent Role Cards Side-by-Side */}
         <div
           style={{
             display: "grid",
@@ -208,26 +220,21 @@ export default function RoleSelectionLandingPage() {
           <div
             onClick={() => setSelectedRole("STUDENT")}
             style={{
-              background:
-                selectedRole === "STUDENT"
-                  ? "linear-gradient(180deg, rgba(37, 99, 235, 0.14) 0%, rgba(15, 23, 42, 0.85) 100%)"
-                  : "rgba(15, 23, 42, 0.6)",
-              border:
-                selectedRole === "STUDENT"
-                  ? "2px solid #3b82f6"
-                  : "1px solid rgba(255, 255, 255, 0.08)",
+              background: "#FFFFFF",
+              border: selectedRole === "STUDENT" ? "2px solid #3448A5" : "1px solid var(--border-default)",
               borderRadius: "16px",
               padding: "2.25rem",
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
               cursor: "pointer",
-              transition: "all 0.25s ease",
+              transition: "all 0.2s ease",
               boxShadow:
                 selectedRole === "STUDENT"
-                  ? "0 0 35px rgba(59, 130, 246, 0.25)"
-                  : "none",
+                  ? "0 6px 24px rgba(52, 72, 165, 0.14)"
+                  : "var(--shadow-card)",
               position: "relative",
+              minHeight: "470px",
             }}
           >
             {selectedRole === "STUDENT" && (
@@ -239,13 +246,17 @@ export default function RoleSelectionLandingPage() {
                   display: "flex",
                   alignItems: "center",
                   gap: "0.3rem",
-                  color: "#60a5fa",
+                  color: "#3448A5",
                   fontSize: "0.72rem",
                   fontWeight: 700,
                   textTransform: "uppercase",
+                  padding: "0.2rem 0.55rem",
+                  borderRadius: "999px",
+                  background: "rgba(52, 72, 165, 0.10)",
+                  border: "1px solid rgba(52, 72, 165, 0.25)",
                 }}
               >
-                <CheckCircle2 size={16} />
+                <CheckCircle2 size={14} />
                 <span>Selected</span>
               </div>
             )}
@@ -257,9 +268,9 @@ export default function RoleSelectionLandingPage() {
                   width: "56px",
                   height: "56px",
                   borderRadius: "14px",
-                  background: "rgba(37, 99, 235, 0.16)",
-                  border: "1px solid rgba(37, 99, 235, 0.35)",
-                  color: "#60a5fa",
+                  background: "rgba(52, 72, 165, 0.08)",
+                  border: "1px solid rgba(52, 72, 165, 0.22)",
+                  color: "#3448A5",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -273,8 +284,10 @@ export default function RoleSelectionLandingPage() {
                 style={{
                   fontSize: "1.5rem",
                   fontWeight: 700,
-                  color: "#ffffff",
+                  fontFamily: "var(--font-display)",
+                  color: "var(--text-primary)",
                   margin: "0 0 0.5rem 0",
+                  letterSpacing: "-0.01em",
                 }}
               >
                 Student Portal
@@ -283,24 +296,41 @@ export default function RoleSelectionLandingPage() {
               <p
                 style={{
                   fontSize: "0.92rem",
-                  color: "#94a3b8",
+                  color: "var(--text-secondary)",
                   lineHeight: 1.55,
                   margin: "0 0 1.5rem 0",
                 }}
               >
-                Manage academic notices, deadlines, courses, and study resources.
+                Manage academic notices, deadlines, courses, and grounded study resources.
               </p>
 
               {/* Feature checklist */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.8rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "1.8rem" }}>
                 {[
                   "Personalized assignment & exam schedules",
-                  "NLP-powered circular & WhatsApp notice parsing",
+                  "NLP-powered circular & notice parsing",
                   "Course syllabus search & grounded answers",
                   "Project rubric criteria & mark calculators",
                 ].map((feat, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.82rem", color: "#cbd5e1" }}>
-                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#3b82f6" }} />
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.55rem",
+                      fontSize: "0.84rem",
+                      color: "var(--text-primary)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "6px",
+                        height: "6px",
+                        borderRadius: "50%",
+                        background: "#3448A5",
+                        flexShrink: 0,
+                      }}
+                    />
                     <span>{feat}</span>
                   </div>
                 ))}
@@ -310,21 +340,12 @@ export default function RoleSelectionLandingPage() {
             <div>
               <Link
                 href="/login?role=student"
+                className="btn btn-primary"
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.5rem",
                   width: "100%",
                   padding: "0.85rem",
                   borderRadius: "10px",
-                  background: "#2563eb",
-                  color: "#ffffff",
-                  fontWeight: 700,
                   fontSize: "0.92rem",
-                  textDecoration: "none",
-                  boxShadow: "0 4px 14px rgba(37, 99, 235, 0.4)",
-                  transition: "all 0.15s ease",
                   boxSizing: "border-box",
                 }}
               >
@@ -338,26 +359,21 @@ export default function RoleSelectionLandingPage() {
           <div
             onClick={() => setSelectedRole("TEACHER")}
             style={{
-              background:
-                selectedRole === "TEACHER"
-                  ? "linear-gradient(180deg, rgba(139, 92, 246, 0.14) 0%, rgba(15, 23, 42, 0.85) 100%)"
-                  : "rgba(15, 23, 42, 0.6)",
-              border:
-                selectedRole === "TEACHER"
-                  ? "2px solid #8b5cf6"
-                  : "1px solid rgba(255, 255, 255, 0.08)",
+              background: "#FFFFFF",
+              border: selectedRole === "TEACHER" ? "2px solid #3448A5" : "1px solid var(--border-default)",
               borderRadius: "16px",
               padding: "2.25rem",
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
               cursor: "pointer",
-              transition: "all 0.25s ease",
+              transition: "all 0.2s ease",
               boxShadow:
                 selectedRole === "TEACHER"
-                  ? "0 0 35px rgba(139, 92, 246, 0.25)"
-                  : "none",
+                  ? "0 6px 24px rgba(52, 72, 165, 0.14)"
+                  : "var(--shadow-card)",
               position: "relative",
+              minHeight: "470px",
             }}
           >
             {selectedRole === "TEACHER" && (
@@ -369,13 +385,17 @@ export default function RoleSelectionLandingPage() {
                   display: "flex",
                   alignItems: "center",
                   gap: "0.3rem",
-                  color: "#c084fc",
+                  color: "#3448A5",
                   fontSize: "0.72rem",
                   fontWeight: 700,
                   textTransform: "uppercase",
+                  padding: "0.2rem 0.55rem",
+                  borderRadius: "999px",
+                  background: "rgba(52, 72, 165, 0.10)",
+                  border: "1px solid rgba(52, 72, 165, 0.25)",
                 }}
               >
-                <CheckCircle2 size={16} />
+                <CheckCircle2 size={14} />
                 <span>Selected</span>
               </div>
             )}
@@ -387,9 +407,9 @@ export default function RoleSelectionLandingPage() {
                   width: "56px",
                   height: "56px",
                   borderRadius: "14px",
-                  background: "rgba(139, 92, 246, 0.16)",
-                  border: "1px solid rgba(139, 92, 246, 0.35)",
-                  color: "#c084fc",
+                  background: "rgba(184, 138, 69, 0.10)",
+                  border: "1px solid rgba(184, 138, 69, 0.25)",
+                  color: "#B88A45",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -403,8 +423,10 @@ export default function RoleSelectionLandingPage() {
                 style={{
                   fontSize: "1.5rem",
                   fontWeight: 700,
-                  color: "#ffffff",
+                  fontFamily: "var(--font-display)",
+                  color: "var(--text-primary)",
                   margin: "0 0 0.5rem 0",
+                  letterSpacing: "-0.01em",
                 }}
               >
                 Teacher Portal
@@ -413,7 +435,7 @@ export default function RoleSelectionLandingPage() {
               <p
                 style={{
                   fontSize: "0.92rem",
-                  color: "#94a3b8",
+                  color: "var(--text-secondary)",
                   lineHeight: 1.55,
                   margin: "0 0 1.5rem 0",
                 }}
@@ -422,15 +444,32 @@ export default function RoleSelectionLandingPage() {
               </p>
 
               {/* Feature checklist */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.8rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "1.8rem" }}>
                 {[
                   "Authorized course & syllabus management",
                   "Assessment rubric creation with mark validation",
                   "Student notice publishing & broadcast dispatch",
                   "Live evaluation & defense walkthrough mode",
                 ].map((feat, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.82rem", color: "#cbd5e1" }}>
-                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#8b5cf6" }} />
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.55rem",
+                      fontSize: "0.84rem",
+                      color: "var(--text-primary)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "6px",
+                        height: "6px",
+                        borderRadius: "50%",
+                        background: "#B88A45",
+                        flexShrink: 0,
+                      }}
+                    />
                     <span>{feat}</span>
                   </div>
                 ))}
@@ -440,21 +479,12 @@ export default function RoleSelectionLandingPage() {
             <div>
               <Link
                 href="/login?role=teacher"
+                className="btn btn-primary"
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.5rem",
                   width: "100%",
                   padding: "0.85rem",
                   borderRadius: "10px",
-                  background: "#7c3aed",
-                  color: "#ffffff",
-                  fontWeight: 700,
                   fontSize: "0.92rem",
-                  textDecoration: "none",
-                  boxShadow: "0 4px 14px rgba(124, 58, 237, 0.4)",
-                  transition: "all 0.15s ease",
                   boxSizing: "border-box",
                 }}
               >
@@ -470,10 +500,11 @@ export default function RoleSelectionLandingPage() {
           style={{
             width: "100%",
             maxWidth: "960px",
-            background: "rgba(15, 23, 42, 0.4)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
+            background: "#FFFFFF",
+            border: "1px solid var(--border-default)",
             borderRadius: "14px",
-            padding: "1.5rem 2rem",
+            padding: "1.75rem 2rem",
+            boxShadow: "var(--shadow-card)",
           }}
         >
           <div
@@ -487,12 +518,20 @@ export default function RoleSelectionLandingPage() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <ShieldCheck size={16} color="#3b82f6" />
-              <span style={{ fontSize: "0.82rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#e2e8f0" }}>
+              <ShieldCheck size={16} color="#3448A5" />
+              <span
+                style={{
+                  fontSize: "0.84rem",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  color: "var(--text-primary)",
+                }}
+              >
                 1-Click Quick Demo Accounts (University Review Defense)
               </span>
             </div>
-            <span style={{ fontSize: "0.72rem", color: "#64748b" }}>
+            <span style={{ fontSize: "0.74rem", color: "var(--text-secondary)" }}>
               Pre-provisioned with isolated database states & course relations
             </span>
           </div>
@@ -513,23 +552,33 @@ export default function RoleSelectionLandingPage() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "flex-start",
-                padding: "0.75rem 1rem",
+                padding: "0.85rem 1rem",
                 borderRadius: "8px",
-                border: "1px solid rgba(59, 130, 246, 0.3)",
-                background: "rgba(59, 130, 246, 0.06)",
+                border: "1px solid var(--border-default)",
+                background: "var(--bg-app)",
                 cursor: "pointer",
                 textAlign: "left",
+                transition: "all 0.15s ease",
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
-                <span style={{ fontSize: "0.84rem", fontWeight: 700, color: "#f8fafc" }}>
+                <span style={{ fontSize: "0.86rem", fontWeight: 700, color: "var(--text-primary)" }}>
                   Saad (Student A)
                 </span>
-                <span style={{ fontSize: "0.62rem", padding: "0.1rem 0.35rem", borderRadius: "4px", background: "rgba(59, 130, 246, 0.2)", color: "#60a5fa", fontWeight: 700 }}>
+                <span
+                  style={{
+                    fontSize: "0.65rem",
+                    padding: "0.12rem 0.4rem",
+                    borderRadius: "4px",
+                    background: "rgba(52, 72, 165, 0.10)",
+                    color: "#3448A5",
+                    fontWeight: 700,
+                  }}
+                >
                   STUDENT
                 </span>
               </div>
-              <span style={{ fontSize: "0.72rem", color: "#94a3b8", marginTop: "0.2rem" }}>
+              <span style={{ fontSize: "0.74rem", color: "var(--text-secondary)", marginTop: "0.25rem" }}>
                 21BDS0142 &bull; NLP / Heavy Workload
               </span>
             </button>
@@ -543,23 +592,33 @@ export default function RoleSelectionLandingPage() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "flex-start",
-                padding: "0.75rem 1rem",
+                padding: "0.85rem 1rem",
                 borderRadius: "8px",
-                border: "1px solid rgba(59, 130, 246, 0.3)",
-                background: "rgba(59, 130, 246, 0.06)",
+                border: "1px solid var(--border-default)",
+                background: "var(--bg-app)",
                 cursor: "pointer",
                 textAlign: "left",
+                transition: "all 0.15s ease",
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
-                <span style={{ fontSize: "0.84rem", fontWeight: 700, color: "#f8fafc" }}>
+                <span style={{ fontSize: "0.86rem", fontWeight: 700, color: "var(--text-primary)" }}>
                   Priya Sharma (Student B)
                 </span>
-                <span style={{ fontSize: "0.62rem", padding: "0.1rem 0.35rem", borderRadius: "4px", background: "rgba(59, 130, 246, 0.2)", color: "#60a5fa", fontWeight: 700 }}>
+                <span
+                  style={{
+                    fontSize: "0.65rem",
+                    padding: "0.12rem 0.4rem",
+                    borderRadius: "4px",
+                    background: "rgba(52, 72, 165, 0.10)",
+                    color: "#3448A5",
+                    fontWeight: 700,
+                  }}
+                >
                   STUDENT
                 </span>
               </div>
-              <span style={{ fontSize: "0.72rem", color: "#94a3b8", marginTop: "0.2rem" }}>
+              <span style={{ fontSize: "0.74rem", color: "var(--text-secondary)", marginTop: "0.25rem" }}>
                 22BCS0218 &bull; ML / Moderate Workload
               </span>
             </button>
@@ -573,23 +632,33 @@ export default function RoleSelectionLandingPage() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "flex-start",
-                padding: "0.75rem 1rem",
+                padding: "0.85rem 1rem",
                 borderRadius: "8px",
-                border: "1px solid rgba(139, 92, 246, 0.3)",
-                background: "rgba(139, 92, 246, 0.06)",
+                border: "1px solid var(--border-default)",
+                background: "var(--bg-app)",
                 cursor: "pointer",
                 textAlign: "left",
+                transition: "all 0.15s ease",
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
-                <span style={{ fontSize: "0.84rem", fontWeight: 700, color: "#f8fafc" }}>
+                <span style={{ fontSize: "0.86rem", fontWeight: 700, color: "var(--text-primary)" }}>
                   Dr. P. Raman (Faculty)
                 </span>
-                <span style={{ fontSize: "0.62rem", padding: "0.1rem 0.35rem", borderRadius: "4px", background: "rgba(139, 92, 246, 0.2)", color: "#c084fc", fontWeight: 700 }}>
+                <span
+                  style={{
+                    fontSize: "0.65rem",
+                    padding: "0.12rem 0.4rem",
+                    borderRadius: "4px",
+                    background: "rgba(184, 138, 69, 0.12)",
+                    color: "#B88A45",
+                    fontWeight: 700,
+                  }}
+                >
                   TEACHER
                 </span>
               </div>
-              <span style={{ fontSize: "0.72rem", color: "#94a3b8", marginTop: "0.2rem" }}>
+              <span style={{ fontSize: "0.74rem", color: "var(--text-secondary)", marginTop: "0.25rem" }}>
                 FAC-NLP-01 &bull; Lead: CSE4001 NLP
               </span>
             </button>
@@ -600,15 +669,16 @@ export default function RoleSelectionLandingPage() {
       {/* Footer */}
       <footer
         style={{
-          borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+          borderTop: "1px solid var(--border-default)",
           padding: "1.25rem 2.5rem",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          fontSize: "0.74rem",
-          color: "#64748b",
+          fontSize: "0.76rem",
+          color: "var(--text-secondary)",
           flexWrap: "wrap",
           gap: "0.5rem",
+          background: "var(--bg-app)",
         }}
       >
         <div>Academic Intelligence Platform &bull; University Project Defense Edition</div>

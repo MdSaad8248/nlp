@@ -26,8 +26,8 @@ export class GeminiProvider implements AIProvider {
   private model: string;
 
   constructor(apiKey?: string, model?: string) {
-    this.apiKey = apiKey || process.env.GEMINI_API_KEY || "";
-    this.model = model || process.env.AI_MODEL || "gemini-1.5-flash";
+    this.apiKey = (apiKey || process.env.GEMINI_API_KEY || "").trim();
+    this.model = model || process.env.GEMINI_MODEL || process.env.AI_MODEL || "gemini-3.8-flash";
   }
 
   public isConfigured(): boolean {

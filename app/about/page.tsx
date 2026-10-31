@@ -29,8 +29,8 @@ export default function AboutPage() {
               letterSpacing: "0.08em",
               padding: "0.15rem 0.5rem",
               borderRadius: "4px",
-              background: "rgba(37, 99, 235, 0.1)",
-              color: "#2563eb",
+              background: "rgba(52, 72, 165, 0.08)",
+              color: "#3448A5",
             }}
           >
             System Architecture
@@ -64,7 +64,7 @@ export default function AboutPage() {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.25rem" }}>
           <div style={{ padding: "1rem", borderRadius: "8px", background: "var(--bg-canvas)", border: "1px solid var(--border-subtle)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", color: "#2563eb", fontWeight: 700, fontSize: "0.86rem", marginBottom: "0.4rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", color: "#3448A5", fontWeight: 700, fontSize: "0.86rem", marginBottom: "0.4rem" }}>
               <ShieldCheck size={16} />
               <span>Zero-Fabrication Guard</span>
             </div>
@@ -74,7 +74,7 @@ export default function AboutPage() {
           </div>
 
           <div style={{ padding: "1rem", borderRadius: "8px", background: "var(--bg-canvas)", border: "1px solid var(--border-subtle)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", color: "#7c3aed", fontWeight: 700, fontSize: "0.86rem", marginBottom: "0.4rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", color: "#3448A5", fontWeight: 700, fontSize: "0.86rem", marginBottom: "0.4rem" }}>
               <Cpu size={16} />
               <span>Hybrid Classification Engine</span>
             </div>
@@ -152,7 +152,7 @@ export default function AboutPage() {
                   width: "28px",
                   height: "28px",
                   borderRadius: "50%",
-                  background: "#2563eb",
+                  background: "#3448A5",
                   color: "#ffffff",
                   display: "flex",
                   alignItems: "center",
@@ -191,8 +191,8 @@ export default function AboutPage() {
         </h2>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-          <div style={{ padding: "1.25rem", borderRadius: "10px", background: "rgba(37, 99, 235, 0.05)", border: "1px solid rgba(37, 99, 235, 0.2)" }}>
-            <div style={{ fontSize: "0.95rem", fontWeight: 700, color: "#2563eb", marginBottom: "0.5rem" }}>
+          <div style={{ padding: "1.25rem", borderRadius: "10px", background: "rgba(52, 72, 165, 0.05)", border: "1px solid rgba(52, 72, 165, 0.2)" }}>
+            <div style={{ fontSize: "0.95rem", fontWeight: 700, color: "#3448A5", marginBottom: "0.5rem" }}>
               Student Boundaries
             </div>
             <ul style={{ margin: 0, paddingLeft: "1.2rem", fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.55 }}>
@@ -202,8 +202,8 @@ export default function AboutPage() {
             </ul>
           </div>
 
-          <div style={{ padding: "1.25rem", borderRadius: "10px", background: "rgba(139, 92, 246, 0.05)", border: "1px solid rgba(139, 92, 246, 0.2)" }}>
-            <div style={{ fontSize: "0.95rem", fontWeight: 700, color: "#7c3aed", marginBottom: "0.5rem" }}>
+          <div style={{ padding: "1.25rem", borderRadius: "10px", background: "rgba(184, 138, 69, 0.05)", border: "1px solid rgba(184, 138, 69, 0.2)" }}>
+            <div style={{ fontSize: "0.95rem", fontWeight: 700, color: "#B88A45", marginBottom: "0.5rem" }}>
               Faculty / Teacher Boundaries
             </div>
             <ul style={{ margin: 0, paddingLeft: "1.2rem", fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.55 }}>
